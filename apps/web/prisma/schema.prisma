@@ -1,0 +1,413 @@
+// Watchtower — Phase 1 schema.
+// Prisma is the single source of truth for migrations. apps/api (FastAPI)
+// mirrors these tables with SQLAlchemy models for its own queries and to
+// validate Auth.js's database session cookie — see apps/api/app/models.py
+// and docs/ADR-001-shared-schema.md for why one migration tool owns this.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Auth.js core tables (standard shape, adapter-compatible) ----------
+
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  username       String?   @unique
+  email          String    @unique
+  emailVerified  DateTime?
+  image          String?
+  passwordHash   String? // null for OAuth-only accounts
+  isSuperAdmin   Boolean   @default(false)
+  suspendedAt    DateTime? // set by a platform admin — blocks every login path and kills existing sessions
+  suspendedReason String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  memberships    OrganizationMember[]
+  auditLogs      AuditLog[]
+  apiKeys        ApiKey[]
+  resetTokens    PasswordResetToken[]
+  incidentActions      IncidentStatusHistory[]
+  fixProposalApprovals FixProposal[]
+  notifications        Notification[]
+
+  @@index([email])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  ipAddress    String?
+  userAgent    String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Used for the custom email-verification link flow (identifier = user email).
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Separate table (not reusing VerificationToken) so a live reset link and a
+// live verification link never share a namespace or a "purpose" flag to get
+// confused — each token type has its own expiry policy and one-time-use flag.
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique // raw token is emailed, only the hash is stored
+  userId    String
+  expires   DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ---------- Organizations & RBAC ----------
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members      OrganizationMember[]
+  repositories Repository[]
+
+  @@index([slug])
+}
+
+model OrganizationMember {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  role           OrgRole  @default(MEMBER)
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+// ---------- Platform admin & audit ----------
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String? // null when the actor is the system/a background job
+  action     String // e.g. "user.login", "org.create", "admin.impersonate.start"
+  targetType String? // e.g. "User", "Organization"
+  targetId   String?
+  metadata   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model FeatureFlag {
+  key         String   @id
+  enabled     Boolean  @default(false)
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  name       String
+  keyHash    String    @unique
+  userId     String
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ---------- Phase 2: GitHub ingestion & engineering graph ----------
+
+// One row per repo an org has installed the Watchtower GitHub App on.
+// installationId is the GitHub App installation, not a per-repo concept —
+// multiple Repository rows can (and normally do) share one installationId
+// when an org installs the app across several repos at once.
+model Repository {
+  id             String    @id @default(cuid())
+  organizationId String
+  installationId String
+  githubRepoId   String    @unique // GitHub's numeric repo id, as a string (BigInt precision without a BigInt column type headache)
+  owner          String
+  name           String
+  fullName       String    @unique // "owner/name"
+  defaultBranch  String?
+  connectedAt    DateTime  @default(now())
+  lastIngestedAt DateTime?
+
+  organization  Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  webhookEvents WebhookEvent[]
+  nodes         GraphNode[]
+  incidents     Incident[]
+
+  @@index([organizationId])
+  @@index([installationId])
+}
+
+// Append-only log of every webhook GitHub ever sent us — kept even after
+// processing, both for audit/replay and so a duplicate delivery (GitHub
+// retries on any non-2xx) is detected by deliveryId instead of double-processed.
+model WebhookEvent {
+  id           String    @id @default(cuid())
+  repositoryId String?
+  deliveryId   String    @unique // X-GitHub-Delivery header
+  eventType    String // "issues" | "pull_request" | "push" | "check_run" | ...
+  action       String? // "opened" | "closed" | "synchronize" | ...
+  payload      Json
+  processedAt  DateTime?
+  error        String?
+  receivedAt   DateTime  @default(now())
+
+  repository Repository? @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  @@index([repositoryId])
+  @@index([eventType])
+  @@index([receivedAt])
+}
+
+enum GraphNodeType {
+  ISSUE
+  PULL_REQUEST
+  COMMIT
+  CHECK_RUN
+}
+
+// A node per issue/PR/commit/check-run, built automatically from real repo
+// history — this is the "auto-built engineering graph" the roadmap
+// describes, and the thing ScopeForce (see the original repo analysis)
+// required manual intake for instead.
+model GraphNode {
+  id           String        @id @default(cuid())
+  repositoryId String
+  type         GraphNodeType
+  externalId   String // issue/PR number, or commit SHA
+  title        String?
+  body         String?       @db.Text
+  url          String?
+  state        String? // "open" | "closed" | "merged" | "success" | "failure" | ...
+  authorLogin  String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  repository Repository  @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  outgoing   GraphEdge[] @relation("SourceNode")
+  incoming   GraphEdge[] @relation("TargetNode")
+  embedding  Embedding?
+  triggeredIncidents Incident[]         @relation("TriggerNode")
+  citedInEvidence    IncidentEvidence[] @relation("CitedInIncident")
+
+  @@unique([repositoryId, type, externalId])
+  @@index([repositoryId])
+  @@index([repositoryId, type])
+}
+
+enum GraphEdgeType {
+  FIXES // PR -> Issue, detected from "fixes #123" / "closes #123" in a PR body
+  REFERENCES // PR/Issue -> Issue, any other "#123" mention
+  PART_OF // Commit -> PR, from the PR's commit list
+}
+
+model GraphEdge {
+  id        String        @id @default(cuid())
+  sourceId  String
+  targetId  String
+  type      GraphEdgeType
+  createdAt DateTime      @default(now())
+
+  source GraphNode @relation("SourceNode", fields: [sourceId], references: [id], onDelete: Cascade)
+  target GraphNode @relation("TargetNode", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, targetId, type])
+  @@index([sourceId])
+  @@index([targetId])
+}
+
+// Embedding vectors, stored as a native Postgres float array rather than a
+// pgvector column — see docs/ADR-003 for why, and the documented upgrade
+// path once a repo's graph is large enough for pgvector's ANN index to earn
+// its keep. Consumed by Phase 3's retrieval step; built here in Phase 2.
+model Embedding {
+  id        String   @id @default(cuid())
+  nodeId    String   @unique
+  vector    Float[]
+  model     String // identifies which embedding function produced this, so a future model change doesn't silently mix incompatible vectors
+  createdAt DateTime @default(now())
+
+  node GraphNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+}
+
+// ---------- Phase 3: root-cause analysis & incident memory ----------
+
+enum IncidentStatus {
+  INVESTIGATING // pipeline is running (transient — rows are created already-resolved in practice since the pipeline runs synchronously; kept for a future async/queued pipeline)
+  ABSTAINED // no LLM configured, or evidence/citations didn't clear the bar — an honest "not enough to go on", not a guess
+  AWAITING_APPROVAL // a hypothesis with a proposed fix is ready for a human to review
+  APPROVED // a human approved the fix proposal; a draft PR was opened
+  REJECTED // a human reviewed and declined the proposed fix
+}
+
+// One row per investigation. Doubles as "incident memory": a later,
+// similar failure's retrieval step searches past incidents' evidence
+// alongside the live graph, which is what lets Watchtower surface
+// "this looks like incident #12" instead of starting from zero every time.
+model Incident {
+  id            String         @id @default(cuid())
+  repositoryId  String
+  triggerNodeId String // the issue/check-run whose webhook triggered this investigation
+  status        IncidentStatus
+  hypothesis    String?        @db.Text
+  proposedFix   String?        @db.Text
+  confidence    Float? // 0-1, only meaningful when status is AWAITING_APPROVAL/APPROVED — never fabricated when ABSTAINED
+  abstainReason String?        @db.Text // set only when status is ABSTAINED — the honest "why not", shown directly in the UI
+  llmProvider   String? // which provider produced this (or null if ABSTAINED with none configured)
+  createdAt     DateTime       @default(now())
+  resolvedAt    DateTime?
+
+  repository    Repository            @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  triggerNode   GraphNode             @relation("TriggerNode", fields: [triggerNodeId], references: [id], onDelete: Cascade)
+  evidence      IncidentEvidence[]
+  statusHistory IncidentStatusHistory[]
+  fixProposal   FixProposal?
+
+  @@index([repositoryId])
+  @@index([status])
+}
+
+// The citation trail: every piece of evidence the hypothesis actually
+// referenced, with its retrieval rank/score preserved — this is what makes
+// "cites the evidence" a checkable claim rather than a marketing line, and
+// what citation verification checks the LLM's output against before trusting it.
+model IncidentEvidence {
+  id         String   @id @default(cuid())
+  incidentId String
+  nodeId     String
+  score      Float // the hybrid retrieval score that surfaced this evidence
+  quotedText String?  @db.Text // the specific snippet the hypothesis leaned on, if the model provided one
+  createdAt  DateTime @default(now())
+
+  incident Incident  @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  node     GraphNode @relation("CitedInIncident", fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@unique([incidentId, nodeId])
+  @@index([incidentId])
+}
+
+model IncidentStatusHistory {
+  id         String         @id @default(cuid())
+  incidentId String
+  fromStatus IncidentStatus?
+  toStatus   IncidentStatus
+  actorId    String? // null when the transition was made by the pipeline itself, not a human
+  note       String?
+  createdAt  DateTime       @default(now())
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  actor    User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([incidentId])
+}
+
+enum FixProposalStatus {
+  DRAFT
+  APPROVED
+  REJECTED
+}
+
+// A fix proposal never edits code on its own — approving one opens a DRAFT
+// pull request containing the incident report as a markdown file on a new
+// branch, for a human to build the actual fix on top of. This is the
+// roadmap's non-negotiable human-approval gate, enforced structurally: there
+// is no code path that reaches GitHub without a row here transitioning to
+// APPROVED by a real actorId first.
+model FixProposal {
+  id           String            @id @default(cuid())
+  incidentId   String            @unique
+  summary      String            @db.Text
+  status       FixProposalStatus @default(DRAFT)
+  prUrl        String?
+  prBranch     String?
+  approvedById String?
+  approvedAt   DateTime?
+  createdAt    DateTime          @default(now())
+
+  incident   Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  approvedBy User?    @relation(fields: [approvedById], references: [id], onDelete: SetNull)
+
+  @@index([incidentId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String // "incident.awaiting_approval" | "incident.abstained" | ...
+  title     String
+  body      String?
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, readAt])
+}
