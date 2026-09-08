@@ -4,4 +4,4 @@ pytest-asyncio==1.4.0
 httpx==0.28.1
 ruff==0.16.6
 mypy==2.3.1
-aiosqlite==0.20.0
+aiosqlite==0.22.1
