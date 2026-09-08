@@ -1,0 +1,22 @@
+{
+  "name": "@watchtower/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prisma:generate": "prisma generate --schema=../web/prisma/schema.prisma",
+    "cleanup": "tsx src/index.ts cleanup-expired-tokens",
+    "build": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.5",
+    "prisma": "6.19.3",
+    "tsx": "4.19.2",
+    "typescript": "5.7.3",
+    "vitest": "2.1.8"
+  }
+}
