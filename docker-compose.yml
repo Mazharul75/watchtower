@@ -1,0 +1,35 @@
+# Optional local dev stack for anyone who has Docker installed.
+#
+# This repo does NOT require Docker: `npm run db:test-up` (scripts/embedded-pg.mjs)
+# runs a genuine local Postgres via the `embedded-postgres` npm package, no
+# Docker needed — that's what this sandbox used to develop and test Phase 1.
+# If you do have Docker, `docker compose up -d` is an equivalent alternative,
+# and adds Redis ahead of Phase 2 (background job queue, distributed rate
+# limiting) even though nothing in Phase 1 requires it yet.
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: watchtower
+    ports:
+      - "55432:5432"
+    volumes:
+      - watchtower_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+volumes:
+  watchtower_pgdata:

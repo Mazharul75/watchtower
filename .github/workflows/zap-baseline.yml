@@ -1,0 +1,26 @@
+name: OWASP ZAP baseline scan
+
+# Manual-only: there is nothing deployed for this to scan until you've
+# actually launched (see docs/LAUNCH_CHECKLIST.md). Run it from the Actions
+# tab with your real deployed URL once you have one. ZAP itself is free and
+# open source (owasp.org/www-project-zap).
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "The deployed URL to scan (e.g. https://your-app.vercel.app)"
+        required: true
+
+jobs:
+  zap-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: ${{ github.event.inputs.target_url }}
+          # Fails the workflow on any WARN or higher so findings aren't
+          # silently ignored; adjust with a rules file if you need to
+          # suppress specific known-acceptable findings.
+          cmd_options: "-a"

@@ -1,0 +1,36 @@
+{
+  "name": "watchtower",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Watchtower — AI engineering memory for GitHub repos. Phase 1: platform, identity, design system.",
+  "workspaces": [
+    "apps/web",
+    "apps/worker",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev:web": "npm run dev --workspace=apps/web",
+    "build:web": "npm run build --workspace=apps/web",
+    "lint:web": "npm run lint --workspace=apps/web",
+    "typecheck:web": "npm run typecheck --workspace=apps/web",
+    "test:web": "npm run test --workspace=apps/web",
+    "e2e:web": "npm run e2e --workspace=apps/web",
+    "build:worker": "npm run build --workspace=apps/worker",
+    "test:worker": "npm run test --workspace=apps/worker",
+    "prisma:generate": "npm run prisma:generate --workspace=apps/web && npm run prisma:generate --workspace=apps/worker",
+    "prisma:migrate": "npm run prisma:migrate --workspace=apps/web",
+    "prisma:seed": "npm run prisma:seed --workspace=apps/web",
+    "db:test-up": "node scripts/embedded-pg.mjs up",
+    "db:test-down": "node scripts/embedded-pg.mjs down"
+  },
+  "devDependencies": {
+    "embedded-postgres": "^18.4.0-beta.17"
+  },
+  "overrides": {
+    "nodemailer": "^10.0.0",
+    "deepmerge-ts": "^8.0.2"
+  }
+}

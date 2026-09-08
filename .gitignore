@@ -1,0 +1,58 @@
+# --- Secrets — NEVER commit ---
+.env
+.env.*
+!.env.example
+!apps/**/.env.example
+*.pem
+*.key
+credentials.json
+service-account*.json
+
+# --- Dependencies ---
+node_modules/
+.pnpm-store/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# --- Build output ---
+.next/
+out/
+dist/
+build/
+apps/web/.next/
+apps/api/**/__pycache__/
+
+# --- Testing ---
+coverage/
+playwright-report/
+test-results/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.tsbuildinfo
+
+# --- Prisma / DB ---
+apps/web/prisma/dev.db
+apps/web/prisma/dev.db-journal
+/pgdata/
+/.embedded-postgres/
+
+# --- Logs ---
+*.log
+npm-debug.log*
+logs/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# --- Sentry ---
+.sentryclirc
+
+# --- Vercel ---
+.vercel

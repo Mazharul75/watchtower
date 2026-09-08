@@ -1,0 +1,66 @@
+name: Nightly backup & token cleanup
+
+# Runs the two nightly hygiene jobs the roadmap calls for:
+#  1. A full Postgres dump, encrypted and pushed to Backblaze B2 (free 10GB tier).
+#  2. The worker's expired-session/token cleanup job (see apps/worker).
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   DATABASE_URL        Same connection string apps/web uses in production.
+#   B2_APPLICATION_KEY_ID / B2_APPLICATION_KEY / B2_BUCKET
+#                        From a free Backblaze B2 account: create a bucket
+#                        and an application key scoped to it.
+#   BACKUP_ENCRYPTION_PASSPHRASE
+#                        Any long random string — used to symmetrically
+#                        encrypt the dump before upload with `openssl enc`,
+#                        so the B2 bucket alone is never enough to read a
+#                        backup.
+#
+# Until those secrets are set, this workflow will fail loudly (not
+# silently skip) — that's intentional so a missing backup is never mistaken
+# for "there was nothing to back up".
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # 03:00 UTC nightly
+  workflow_dispatch: {} # allow a manual run from the Actions tab
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install postgresql-client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Dump database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: pg_dump "$DATABASE_URL" --format=custom --file=watchtower-$(date +%F).dump
+
+      - name: Encrypt dump
+        env:
+          PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        run: |
+          for f in watchtower-*.dump; do
+            openssl enc -aes-256-cbc -pbkdf2 -salt -in "$f" -out "$f.enc" -pass env:PASSPHRASE
+            rm "$f"
+          done
+
+      - name: Install rclone
+        run: curl https://rclone.org/install.sh | sudo bash
+
+      - name: Upload to Backblaze B2
+        env:
+          RCLONE_CONFIG_B2_TYPE: b2
+          RCLONE_CONFIG_B2_ACCOUNT: ${{ secrets.B2_APPLICATION_KEY_ID }}
+          RCLONE_CONFIG_B2_KEY: ${{ secrets.B2_APPLICATION_KEY }}
+        run: rclone copy watchtower-*.dump.enc "b2:${{ secrets.B2_BUCKET }}/backups/"
+
+      - name: Cleanup expired sessions and one-time tokens
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          npm ci --workspace=apps/worker --include-workspace-root
+          npm run prisma:generate --workspace=apps/worker
+          npm run cleanup --workspace=apps/worker
