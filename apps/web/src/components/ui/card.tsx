@@ -1,5 +1,17 @@
-export function Card({ className = "", children }: { className?: string; children: React.ReactNode }) {
-  return <div className={`glass-card rounded-2xl ${className}`}>{children}</div>;
+export function Card({
+  className = "",
+  style,
+  children,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={`glass-card rounded-2xl ${className}`} style={style}>
+      {children}
+    </div>
+  );
 }
 
 export function CardHeader({ title, description }: { title: string; description?: string }) {

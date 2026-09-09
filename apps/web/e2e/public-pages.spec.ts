@@ -3,7 +3,10 @@ import { test, expect } from "@playwright/test";
 test.describe("public pages", () => {
   test("landing page renders the hero and CTAs", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: /engineering memory/i })).toBeVisible();
+    // Scoped to level:1 — the page also has an h2 ("Inside GitHub
+    // Engineering Memory") and an h3 (the GitHub solution card's title)
+    // that a looser match would collide with.
+    await expect(page.getByRole("heading", { name: /engineering platform/i, level: 1 })).toBeVisible();
     await expect(page.getByRole("link", { name: /get started free/i }).first()).toBeVisible();
   });
 

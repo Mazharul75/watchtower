@@ -5,6 +5,7 @@ const COLUMNS: { title: string; links: { label: string; href: string; external?:
   {
     title: "Product",
     links: [
+      { label: "Solutions", href: "/#solutions" },
       { label: "Features", href: "/#features" },
       { label: "How it works", href: "/#how-it-works" },
       { label: "FAQ", href: "/#faq" },

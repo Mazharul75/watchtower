@@ -23,6 +23,27 @@ const PRINCIPLES = [
   },
 ];
 
+const SOLUTIONS = [
+  {
+    title: "GitHub Engineering Memory",
+    accent: "var(--color-brand-indigo)",
+    description:
+      "Auto-built engineering graph from your real issues, PRs, and CI runs, cited root-cause analysis, and incident memory that compounds over time.",
+  },
+  {
+    title: "Error Tracking",
+    accent: "#f43f5e",
+    description:
+      "Drop a snippet into any app — website, mobile, anything, connected to GitHub or not — and see real runtime errors, deduplicated into groups with full stack traces.",
+  },
+  {
+    title: "AI Chatbots",
+    accent: "var(--color-brand-cyan)",
+    description:
+      "A support chatbot for your site, grounded only in documents you give it — it says \"I don't know\" instead of inventing an answer.",
+  },
+];
+
 const FEATURES = [
   {
     title: "Auto-built engineering graph",
@@ -81,16 +102,16 @@ export default function LandingPage() {
             className="animate-fade-rise mx-auto max-w-3xl text-4xl font-bold leading-tight tracking-tight md:text-6xl"
             style={{ animationDelay: "80ms" }}
           >
-            An AI engineering memory
+            The engineering platform,
             <br />
-            <span className="text-brand-gradient">for your GitHub repos.</span>
+            <span className="text-brand-gradient">built free.</span>
           </h1>
           <p
             className="animate-fade-rise mx-auto mt-6 max-w-xl text-balance text-base text-[var(--color-foreground-muted)] md:text-lg"
             style={{ animationDelay: "160ms" }}
           >
-            Watchtower finds the root cause, cites the evidence, remembers every incident, and waits for your
-            approval before touching anything — built free, end to end.
+            GitHub engineering memory, error tracking for any app, and an AI chatbot grounded in your own docs — one
+            login, one platform, genuinely free to run.
           </p>
           <div
             className="animate-fade-rise mt-10 flex flex-wrap items-center justify-center gap-4"
@@ -105,9 +126,26 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section id="solutions" className="mx-auto max-w-6xl px-6 pb-24">
+          <div className="mx-auto mb-14 max-w-2xl text-center">
+            <h2 className="text-3xl font-semibold tracking-tight">Three solutions, one platform</h2>
+            <p className="mt-3 text-[var(--color-foreground-muted)]">
+              Not upgrades to a single tool — genuinely separate products, sharing one login, one org, one free deployment.
+            </p>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-3">
+            {SOLUTIONS.map((s) => (
+              <Card key={s.title} className="border-l-4 p-6" style={{ borderLeftColor: s.accent }}>
+                <h3 className="font-semibold text-[var(--color-foreground)]">{s.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--color-foreground-muted)]">{s.description}</p>
+              </Card>
+            ))}
+          </div>
+        </section>
+
         <section id="features" className="mx-auto max-w-6xl px-6 pb-24">
           <div className="mx-auto mb-14 max-w-2xl text-center">
-            <h2 className="text-3xl font-semibold tracking-tight">Everything a maintainer actually needs</h2>
+            <h2 className="text-3xl font-semibold tracking-tight">Inside GitHub Engineering Memory</h2>
             <p className="mt-3 text-[var(--color-foreground-muted)]">
               No confidence theatre. Every claim Watchtower makes is grounded in evidence you can click through to,
               or it says nothing at all.
@@ -127,7 +165,7 @@ export default function LandingPage() {
           <div className="mx-auto mb-14 max-w-2xl text-center">
             <h2 className="text-3xl font-semibold tracking-tight">How it works</h2>
             <p className="mt-3 text-[var(--color-foreground-muted)]">
-              Built in four phases. Phase 1 — the platform you can use right now — is complete.
+              Create an account, create an organization, then turn on whichever solutions you need — nothing is forced on you.
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-4">

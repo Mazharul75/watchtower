@@ -13,6 +13,7 @@ export async function Navbar() {
           <LogoWordmark size={18} />
         </Link>
         <nav className="hidden items-center gap-8 text-sm text-[var(--color-foreground-muted)] md:flex">
+          <Link href="/#solutions" className="hover:text-[var(--color-foreground)]">Solutions</Link>
           <Link href="/#features" className="hover:text-[var(--color-foreground)]">Features</Link>
           <Link href="/#how-it-works" className="hover:text-[var(--color-foreground)]">How it works</Link>
           <Link href="/#faq" className="hover:text-[var(--color-foreground)]">FAQ</Link>
