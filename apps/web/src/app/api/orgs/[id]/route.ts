@@ -9,22 +9,39 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const { user } = await requireOrgRole(id, "OWNER");
 
     const body = await request.json().catch(() => null);
-    const name = typeof body?.name === "string" ? body.name.trim() : "";
-    if (name.length < 2 || name.length > 64) {
-      return NextResponse.json({ error: "Organization name must be between 2 and 64 characters." }, { status: 400 });
+    const data: { name?: string; slackWebhookUrl?: string | null } = {};
+
+    if (typeof body?.name === "string") {
+      const name = body.name.trim();
+      if (name.length < 2 || name.length > 64) {
+        return NextResponse.json({ error: "Organization name must be between 2 and 64 characters." }, { status: 400 });
+      }
+      data.name = name;
     }
 
-    const org = await prisma.organization.update({ where: { id }, data: { name } });
+    if (typeof body?.slackWebhookUrl === "string") {
+      const url = body.slackWebhookUrl.trim();
+      if (url && !/^https:\/\/hooks\.slack\.com\/services\//.test(url)) {
+        return NextResponse.json({ error: "That doesn't look like a Slack Incoming Webhook URL (should start with https://hooks.slack.com/services/)." }, { status: 400 });
+      }
+      data.slackWebhookUrl = url || null;
+    }
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: "Nothing to update." }, { status: 400 });
+    }
+
+    const org = await prisma.organization.update({ where: { id }, data });
 
     await writeAuditLog({
       actorId: user.id,
-      action: "org.renamed",
+      action: data.name ? "org.renamed" : "org.slack_webhook_updated",
       targetType: "Organization",
       targetId: id,
-      metadata: { name },
+      metadata: data.name ? { name: data.name } : { hasWebhook: Boolean(data.slackWebhookUrl) },
     });
 
-    return NextResponse.json({ organization: { id: org.id, name: org.name, slug: org.slug } });
+    return NextResponse.json({ organization: { id: org.id, name: org.name, slug: org.slug, slackWebhookUrl: org.slackWebhookUrl } });
   } catch (err) {
     if (err instanceof UnauthorizedError) return NextResponse.json({ error: err.message }, { status: 401 });
     if (err instanceof ForbiddenError) return NextResponse.json({ error: err.message }, { status: 403 });

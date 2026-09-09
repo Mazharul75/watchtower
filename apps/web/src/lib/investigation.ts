@@ -5,6 +5,7 @@ import { getLLMProvider } from "@/lib/llm";
 import type { EvidenceItem } from "@/lib/llm/types";
 import { writeAuditLog } from "@/lib/audit";
 import { verifyCitations, decideOutcome } from "@/lib/investigation-logic";
+import { postToSlack } from "@/lib/slack";
 
 const EVIDENCE_LIMIT = 8;
 
@@ -131,10 +132,13 @@ async function recordTransition(
 }
 
 async function notifyOrgAdmins(organizationId: string, incidentId: string, title: string): Promise<void> {
-  const admins = await prisma.organizationMember.findMany({
-    where: { organizationId, role: { in: ["OWNER", "ADMIN"] } },
-    select: { userId: true },
-  });
+  const [admins, org] = await Promise.all([
+    prisma.organizationMember.findMany({
+      where: { organizationId, role: { in: ["OWNER", "ADMIN"] } },
+      select: { userId: true },
+    }),
+    prisma.organization.findUnique({ where: { id: organizationId }, select: { slackWebhookUrl: true } }),
+  ]);
   if (admins.length === 0) return;
 
   await prisma.notification.createMany({
@@ -146,4 +150,12 @@ async function notifyOrgAdmins(organizationId: string, incidentId: string, title
     })),
   });
   await writeAuditLog({ actorId: null, action: "incident.fix_proposal_created", targetType: "Incident", targetId: incidentId });
+
+  // Best-effort — never allowed to affect the investigation pipeline's own
+  // outcome. The in-app Notification rows above are the real source of
+  // truth; this is a convenience mirror for teams that live in Slack.
+  if (org?.slackWebhookUrl) {
+    const baseUrl = process.env.NEXTAUTH_URL ?? "";
+    await postToSlack(org.slackWebhookUrl, `*Watchtower:* ${title}\n${baseUrl}/dashboard/incidents/${incidentId}`);
+  }
 }

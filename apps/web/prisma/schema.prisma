@@ -117,6 +117,11 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Optional Slack Incoming Webhook URL — when set, incident.awaiting_approval
+  // and incident.abstained events post a real message there, alongside the
+  // in-app Notification rows those events already write.
+  slackWebhookUrl String?
+
   members      OrganizationMember[]
   repositories Repository[]
 
