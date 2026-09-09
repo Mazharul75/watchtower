@@ -42,7 +42,7 @@ export function ProfileForm({ initialName }: { initialName: string | null }) {
     return (
       <div className="flex items-center gap-3">
         <dd>{initialName ?? "—"}</dd>
-        <button type="button" onClick={() => setEditing(true)} className="text-xs text-[var(--color-brand-cyan)] hover:underline">
+        <button type="button" onClick={() => setEditing(true)} className="text-xs text-[var(--color-link)] hover:underline">
           Edit
         </button>
       </div>

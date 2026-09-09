@@ -13,7 +13,7 @@ export default function ForgotPasswordPage() {
       footer={
         <>
           Remembered it?{" "}
-          <Link href="/login" className="text-[var(--color-brand-cyan)] underline underline-offset-2">
+          <Link href="/login" className="text-[var(--color-link)] underline underline-offset-2">
             Log in
           </Link>
         </>

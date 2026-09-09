@@ -24,17 +24,21 @@ export const colors = {
   },
   foreground: {
     DEFAULT: "#14171C",
-    // ~7.2:1 against the page background.
-    muted: "#475569",
-    // WCAG 2.1 AA fix — see globals.css's twin definition for the exact
-    // contrast math against #FAFAF8 (not a bare #FFFFFF assumption); keep
-    // these two files in sync.
-    subtle: "#64748B",
+    // ~11.7:1 against white.
+    muted: "#334155",
+    // WCAG 2.1 AA fix, round two — see globals.css's twin definition for
+    // why the first value (a bare ~4.7:1 pass) still failed axe-core in
+    // practice, and keep these two files in sync.
+    subtle: "#52606D",
   },
   brand: {
     indigo: "#6366F1",
     violet: "#8B5CF6",
     cyan: "#22D3EE",
+    // Brand accents are for fills/borders/gradients, not text — neither
+    // clears 4.5:1 as link/button text on this background. Use this for
+    // that instead (~7.9:1, see globals.css).
+    link: "#4338CA",
   },
   semantic: {
     success: "#10B981",

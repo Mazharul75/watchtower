@@ -18,7 +18,7 @@ export default async function SignupPage() {
       footer={
         <>
           Already have an account?{" "}
-          <Link href="/login" className="text-[var(--color-brand-cyan)] underline underline-offset-2">
+          <Link href="/login" className="text-[var(--color-link)] underline underline-offset-2">
             Log in
           </Link>
         </>

@@ -40,7 +40,7 @@ export function ForgotPasswordForm() {
     return (
       <div className="flex flex-col gap-4">
         <Alert tone="success">{message}</Alert>
-        <Link href="/login" className="text-center text-sm text-[var(--color-brand-cyan)] underline underline-offset-2">
+        <Link href="/login" className="text-center text-sm text-[var(--color-link)] underline underline-offset-2">
           Back to log in
         </Link>
       </div>

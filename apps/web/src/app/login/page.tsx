@@ -24,7 +24,7 @@ export default async function LoginPage({
       footer={
         <>
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="text-[var(--color-brand-cyan)] underline underline-offset-2">
+          <Link href="/signup" className="text-[var(--color-link)] underline underline-offset-2">
             Sign up free
           </Link>
         </>

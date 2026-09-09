@@ -17,18 +17,29 @@
   --color-border: rgba(15, 23, 42, 0.08);
   --color-border-strong: rgba(15, 23, 42, 0.14);
   --color-foreground: #14171c;
-  /* #475569 (slate-600): ~7.2:1 against the page background — comfortably
-     safe for secondary body text. */
-  --color-foreground-muted: #475569;
-  /* #64748b (slate-500): ~4.7:1 against the page background — clears
-     WCAG 2.1 AA's 4.5:1 minimum with a small margin (verified against the
-     exact #fafaf8 background, not a bare #ffffff assumption), used only
-     for the least prominent text (timestamps, captions). */
-  --color-foreground-subtle: #64748b;
+  /* #334155 (slate-700): ~11.7:1 against white — very safe. */
+  --color-foreground-muted: #334155;
+  /* A ~4.7:1-against-white color (Tailwind's slate-500, #64748b) reads as
+     a clean pass in isolation but the axe-core accessibility suite caught
+     it actually failing on real card text: `backdrop-filter: blur()` on
+     .glass-card plus the ambient glow underneath it shifts the *rendered*
+     pixel color measurably lighter than the raw CSS value, especially at
+     small font sizes where anti-aliasing blends text-edge pixels with
+     whatever is behind them. #52606d gives real headroom (~6.4:1 against
+     flat white) so it survives that drift instead of hovering right at
+     the 4.5:1 line. */
+  --color-foreground-subtle: #52606d;
 
   --color-brand-indigo: #6366f1;
   --color-brand-violet: #8b5cf6;
   --color-brand-cyan: #22d3ee;
+  /* A dedicated, darker link color — the brand accents above (indigo
+     ~4.47:1, cyan ~1.7:1 against this background) read great as gradient
+     fills, borders, and dots, but neither clears WCAG AA's 4.5:1 as actual
+     link/button TEXT on a light background. #4338CA (indigo-700) does,
+     with real margin (~7.9:1), confirmed by the axe-core accessibility
+     suite catching the cyan version of this exact mistake. */
+  --color-link: #4338ca;
 
   --color-success: #10b981;
   --color-warning: #f59e0b;

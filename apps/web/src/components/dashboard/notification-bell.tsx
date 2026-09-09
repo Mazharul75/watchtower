@@ -76,7 +76,7 @@ export function NotificationBell() {
           <path d="M13.73 21a2 2 0 0 1-3.46 0" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-brand-cyan)] px-1 text-[10px] font-semibold text-[var(--color-background)]">
+          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-brand-cyan)] px-1 text-[10px] font-semibold text-[#0B0F1A]">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -87,7 +87,7 @@ export function NotificationBell() {
           <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
             <span className="text-sm font-semibold text-[var(--color-foreground)]">Notifications</span>
             {unreadCount > 0 && (
-              <button type="button" onClick={markAllRead} className="text-xs text-[var(--color-brand-cyan)] hover:underline">
+              <button type="button" onClick={markAllRead} className="text-xs text-[var(--color-link)] hover:underline">
                 Mark all read
               </button>
             )}

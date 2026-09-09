@@ -74,7 +74,7 @@ export function VerifyEmailStatus({ token, email }: { token?: string; email?: st
       <Alert tone="danger">{message}</Alert>
       <ResendVerificationForm defaultEmail={email} />
       <p className="text-center text-sm text-[var(--color-foreground-muted)]">
-        <Link href="/login" className="text-[var(--color-brand-cyan)] underline underline-offset-2">
+        <Link href="/login" className="text-[var(--color-link)] underline underline-offset-2">
           Back to log in
         </Link>
       </p>

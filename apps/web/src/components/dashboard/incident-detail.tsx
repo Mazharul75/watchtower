@@ -187,7 +187,7 @@ export function IncidentDetail({ incidentId, canApprove }: { incidentId: string;
 
           {incident.fixProposal.prUrl && (
             <p className="mt-2 text-sm">
-              <a href={incident.fixProposal.prUrl} target="_blank" rel="noreferrer" className="text-[var(--color-brand-cyan)] hover:underline">
+              <a href={incident.fixProposal.prUrl} target="_blank" rel="noreferrer" className="text-[var(--color-link)] hover:underline">
                 View draft pull request →
               </a>
             </p>
