@@ -125,6 +125,7 @@ model Organization {
   members         OrganizationMember[]
   repositories    Repository[]
   ingestProjects  IngestProject[]
+  chatbots        Chatbot[]
 
   @@index([slug])
 }
@@ -484,4 +485,54 @@ model ErrorEvent {
 
   @@index([groupId])
   @@index([receivedAt])
+}
+
+// ---------- AI Chatbot — another standalone product. An org pastes in the
+// documents it wants a support bot to know about (a FAQ, a docs page, a
+// policy), Watchtower embeds them with the same deterministic embedder
+// used for the GitHub graph (lib/embeddings.ts) and answers visitor
+// questions using the same hybrid-retrieval + honest-abstention pattern
+// as incident investigation: cite only what was actually retrieved, say
+// "I don't know" rather than invent an answer when nothing relevant is
+// found or no LLM provider is configured. ----------
+
+model Chatbot {
+  id           String   @id @default(cuid())
+  organizationId String
+  name         String
+  publicKey    String   @unique @default(cuid())
+  createdAt    DateTime @default(now())
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  documents    ChatDocument[]
+  messages     ChatMessage[]
+
+  @@index([organizationId])
+}
+
+model ChatDocument {
+  id        String   @id @default(cuid())
+  chatbotId String
+  title     String
+  content   String   @db.Text
+  embedding Float[]
+  createdAt DateTime @default(now())
+
+  chatbot Chatbot @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+
+  @@index([chatbotId])
+}
+
+model ChatMessage {
+  id               String   @id @default(cuid())
+  chatbotId        String
+  question         String   @db.Text
+  answer           String   @db.Text
+  citedDocumentIds String[]
+  createdAt        DateTime @default(now())
+
+  chatbot Chatbot @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+
+  @@index([chatbotId])
+  @@index([createdAt])
 }

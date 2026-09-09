@@ -44,7 +44,7 @@ export default async function OrgDetailPage({
   const fourteenDaysAgo = new Date();
   fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
-  const [flag, repoCount, memberCount, repos, incidentCounts, recentIncidents, recentIncidentDates, ingestProjectCount, unresolvedErrorCount] = await Promise.all([
+  const [flag, repoCount, memberCount, repos, incidentCounts, recentIncidents, recentIncidentDates, ingestProjectCount, unresolvedErrorCount, chatbotCount, chatMessageCount] = await Promise.all([
     prisma.featureFlag.findUnique({ where: { key: "phase2.github_ingestion" } }),
     prisma.repository.count({ where: { organizationId: id } }),
     prisma.organizationMember.count({ where: { organizationId: id } }),
@@ -69,6 +69,8 @@ export default async function OrgDetailPage({
     }),
     prisma.ingestProject.count({ where: { organizationId: id } }),
     prisma.errorGroup.count({ where: { project: { organizationId: id }, resolvedAt: null } }),
+    prisma.chatbot.count({ where: { organizationId: id } }),
+    prisma.chatMessage.count({ where: { chatbot: { organizationId: id } } }),
   ]);
 
   const repoIds = repos.map((r) => r.id);
@@ -135,7 +137,7 @@ export default async function OrgDetailPage({
 
       <div>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--color-foreground-subtle)]">Solutions</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Link href={`/dashboard/orgs/${id}`} className="glass-card block rounded-2xl border-l-4 p-5" style={{ borderLeftColor: "var(--color-brand-indigo)" }}>
             <div className="mb-1 flex items-center justify-between">
               <span className="text-sm font-semibold text-[var(--color-foreground)]">GitHub Engineering Memory</span>
@@ -156,6 +158,17 @@ export default async function OrgDetailPage({
               {ingestProjectCount > 0
                 ? `Monitoring ${ingestProjectCount} project${ingestProjectCount === 1 ? "" : "s"} — any app, not just GitHub repos.`
                 : "Drop a snippet into any app — website, mobile, anything — and see its real runtime errors here."}
+            </p>
+          </Link>
+          <Link href={`/dashboard/orgs/${id}/chatbots`} className="glass-card block rounded-2xl border-l-4 p-5" style={{ borderLeftColor: "var(--color-brand-cyan)" }}>
+            <div className="mb-1 flex items-center justify-between">
+              <span className="text-sm font-semibold text-[var(--color-foreground)]">AI Chatbots</span>
+              {chatMessageCount > 0 && <Badge tone="info">{chatMessageCount} asked</Badge>}
+            </div>
+            <p className="text-xs text-[var(--color-foreground-muted)]">
+              {chatbotCount > 0
+                ? `${chatbotCount} chatbot${chatbotCount === 1 ? "" : "s"} — grounded in your own documents, never fabricates.`
+                : "A support chatbot for your website, grounded only in documents you give it."}
             </p>
           </Link>
         </div>
