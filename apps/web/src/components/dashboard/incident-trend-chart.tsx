@@ -31,15 +31,15 @@ export function IncidentTrendChart({ days }: { days: DayCount[] }) {
                 width={barWidth}
                 height={barHeight}
                 rx="4"
-                fill={d.count > 0 ? "url(#wt-bar-grad)" : "#1c2333"}
+                fill={d.count > 0 ? "url(#wt-bar-grad)" : "#e5e7eb"}
                 style={{ animation: "wt-bar-grow 0.5s cubic-bezier(0.16,1,0.3,1) both", animationDelay: `${i * 30}ms`, transformOrigin: `${x + barWidth / 2}px ${chartHeight}px` }}
               />
               {d.count > 0 && (
-                <text x={x + barWidth / 2} y={y - 6} textAnchor="middle" fontSize="10" fill="#94a3b8">
+                <text x={x + barWidth / 2} y={y - 6} textAnchor="middle" fontSize="10" fill="#475569">
                   {d.count}
                 </text>
               )}
-              <text x={x + barWidth / 2} y={chartHeight + 16} textAnchor="middle" fontSize="9" fill="#7b8aa0">
+              <text x={x + barWidth / 2} y={chartHeight + 16} textAnchor="middle" fontSize="9" fill="#64748b">
                 {d.label}
               </text>
             </g>

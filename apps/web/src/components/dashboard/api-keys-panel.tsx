@@ -80,7 +80,7 @@ export function ApiKeysPanel() {
         <Alert tone="success">
           <div className="flex flex-col gap-2">
             <p className="font-medium">Copy this key now — you won&apos;t be able to see it again.</p>
-            <code className="block overflow-x-auto rounded-lg bg-black/30 px-3 py-2 font-mono text-xs">{newKey}</code>
+            <code className="block overflow-x-auto rounded-lg bg-[#0F172A] px-3 py-2 font-mono text-xs text-slate-100">{newKey}</code>
             <div>
               <Button size="sm" variant="secondary" onClick={() => setNewKey(null)}>
                 Done, I copied it

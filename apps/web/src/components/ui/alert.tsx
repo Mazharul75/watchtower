@@ -1,10 +1,13 @@
 type Tone = "danger" | "success" | "info" | "warning";
 
+// Dark, saturated text on a pale tinted background — the inverse of what a
+// dark theme needs (there, a light pastel reads on a dark tint). These are
+// picked for >=4.5:1 contrast against their own tone's ~10%-alpha tint.
 const toneStyles: Record<Tone, string> = {
-  danger: "bg-[var(--color-danger)]/10 border-[var(--color-danger)]/30 text-[#FCA5B1]",
-  success: "bg-[var(--color-success)]/10 border-[var(--color-success)]/30 text-[#6EE7B7]",
-  info: "bg-[var(--color-info)]/10 border-[var(--color-info)]/30 text-[#7DD3FC]",
-  warning: "bg-[var(--color-warning)]/10 border-[var(--color-warning)]/30 text-[#FCD34D]",
+  danger: "bg-[var(--color-danger)]/10 border-[var(--color-danger)]/30 text-[#B91C3C]",
+  success: "bg-[var(--color-success)]/10 border-[var(--color-success)]/30 text-[#047857]",
+  info: "bg-[var(--color-info)]/10 border-[var(--color-info)]/30 text-[#0369A1]",
+  warning: "bg-[var(--color-warning)]/10 border-[var(--color-warning)]/30 text-[#B45309]",
 };
 
 export function Alert({ tone = "info", children }: { tone?: Tone; children: React.ReactNode }) {

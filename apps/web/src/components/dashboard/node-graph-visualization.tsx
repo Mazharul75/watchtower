@@ -27,11 +27,14 @@ const COLUMN_LABEL: Record<GraphNodeDTO["type"], string> = {
   COMMIT: "Commits",
   CHECK_RUN: "CI checks",
 };
+// `text` is a dark, saturated variant of each hue — the light-theme inverse
+// of what a dark canvas needs (there, a pastel reads on a dark tint; here,
+// a pale tinted `fill` needs dark text on top of it for contrast).
 const TYPE_ACCENT: Record<GraphNodeDTO["type"], { stroke: string; fill: string; text: string }> = {
-  ISSUE: { stroke: "#f43f5e", fill: "rgba(244, 63, 94, 0.12)", text: "#fca5a5" },
-  PULL_REQUEST: { stroke: "#10b981", fill: "rgba(16, 185, 129, 0.12)", text: "#6ee7b7" },
-  COMMIT: { stroke: "#38bdf8", fill: "rgba(56, 189, 248, 0.12)", text: "#7dd3fc" },
-  CHECK_RUN: { stroke: "#94a3b8", fill: "rgba(148, 163, 184, 0.12)", text: "#cbd5e1" },
+  ISSUE: { stroke: "#f43f5e", fill: "rgba(244, 63, 94, 0.10)", text: "#b91c3c" },
+  PULL_REQUEST: { stroke: "#10b981", fill: "rgba(16, 185, 129, 0.10)", text: "#047857" },
+  COMMIT: { stroke: "#38bdf8", fill: "rgba(56, 189, 248, 0.10)", text: "#0369a1" },
+  CHECK_RUN: { stroke: "#94a3b8", fill: "rgba(148, 163, 184, 0.14)", text: "#475569" },
 };
 const EDGE_LABEL: Record<GraphEdgeDTO["type"], string> = {
   FIXES: "fixes",
@@ -133,11 +136,11 @@ export function NodeGraphVisualization({
         ))}
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-black/10 p-2">
+      <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-black/[0.025] p-2">
         <svg width={width} height={height} className="block">
           <defs>
             <marker id="wt-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L8,4 L0,8 Z" fill="#4b5568" />
+              <path d="M0,0 L8,4 L0,8 Z" fill="#94a3b8" />
             </marker>
           </defs>
 
@@ -158,13 +161,13 @@ export function NodeGraphVisualization({
                 <path
                   d={`M ${sx} ${sy} C ${sx + 40} ${sy}, ${tx - 40} ${ty}, ${tx} ${ty}`}
                   fill="none"
-                  stroke="#4b5568"
+                  stroke="#94a3b8"
                   strokeWidth="1.4"
                   markerEnd="url(#wt-arrow)"
                   style={{ animation: `wt-edge-draw 0.6s ease-out both`, animationDelay: `${i * 30}ms` }}
                 />
-                <rect x={midX - labelWidth / 2} y={midY - 9} width={labelWidth} height="16" rx="4" fill="#0B0F1A" />
-                <text x={midX} y={midY + 3} textAnchor="middle" fontSize="10" fill="#7b8aa0">
+                <rect x={midX - labelWidth / 2} y={midY - 9} width={labelWidth} height="16" rx="4" fill="#F1F3F5" />
+                <text x={midX} y={midY + 3} textAnchor="middle" fontSize="10" fill="#475569">
                   {label}
                 </text>
               </g>
@@ -193,7 +196,7 @@ export function NodeGraphVisualization({
                   <text x="12" y="22" fontSize="11" fontWeight="600" fill={accent.text}>
                     {node.type === "PULL_REQUEST" ? "PR" : node.type === "CHECK_RUN" ? "Check" : node.type === "COMMIT" ? "Commit" : "Issue"} #{node.externalId.slice(0, 8)}
                   </text>
-                  <text x="12" y="40" fontSize="11" fill="#E5E7EB">
+                  <text x="12" y="40" fontSize="11" fill="#1f2937">
                     {(node.title ?? "(not yet fetched)").slice(0, 30)}
                     {(node.title?.length ?? 0) > 30 ? "…" : ""}
                   </text>
@@ -202,12 +205,13 @@ export function NodeGraphVisualization({
                       <button
                         type="button"
                         title="Investigate"
+                        aria-label="Investigate"
                         onClick={(e) => {
                           e.stopPropagation();
                           onInvestigate(node.id);
                         }}
                         disabled={investigatingId === node.id}
-                        className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-[10px] text-[var(--color-foreground)] hover:bg-white/20"
+                        className="flex h-6 w-6 items-center justify-center rounded-full bg-black/[0.06] text-[10px] text-[var(--color-foreground)] hover:bg-black/10"
                       >
                         {investigatingId === node.id ? "…" : "🔍"}
                       </button>

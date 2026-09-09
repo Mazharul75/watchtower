@@ -120,12 +120,12 @@ export function GraphViewer({ repositoryId, canInvestigate }: { repositoryId: st
   }, {});
 
   const viewToggle = (
-    <div className="mb-4 flex justify-end gap-1 rounded-lg border border-[var(--color-border)] bg-black/10 p-1">
+    <div className="mb-4 flex justify-end gap-1 rounded-lg border border-[var(--color-border)] bg-black/[0.03] p-1">
       <button
         type="button"
         onClick={() => setView("graph")}
         className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-          view === "graph" ? "bg-white/10 text-[var(--color-foreground)]" : "text-[var(--color-foreground-subtle)] hover:text-[var(--color-foreground)]"
+          view === "graph" ? "bg-white text-[var(--color-foreground)] shadow-sm" : "text-[var(--color-foreground-subtle)] hover:text-[var(--color-foreground)]"
         }`}
       >
         Graph view
@@ -134,7 +134,7 @@ export function GraphViewer({ repositoryId, canInvestigate }: { repositoryId: st
         type="button"
         onClick={() => setView("list")}
         className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-          view === "list" ? "bg-white/10 text-[var(--color-foreground)]" : "text-[var(--color-foreground-subtle)] hover:text-[var(--color-foreground)]"
+          view === "list" ? "bg-white text-[var(--color-foreground)] shadow-sm" : "text-[var(--color-foreground-subtle)] hover:text-[var(--color-foreground)]"
         }`}
       >
         List view
@@ -200,7 +200,7 @@ export function GraphViewer({ repositoryId, canInvestigate }: { repositoryId: st
                         {relationships.map((edge) => {
                           const target = nodesById.get(edge.target);
                           return (
-                            <li key={edge.id} className="rounded-full bg-white/5 px-2.5 py-1">
+                            <li key={edge.id} className="rounded-full bg-black/[0.04] px-2.5 py-1">
                               {edgeLabel(edge.type)} {target ? `${TYPE_LABEL[target.type].toLowerCase()} #${target.externalId}` : "…"}
                             </li>
                           );

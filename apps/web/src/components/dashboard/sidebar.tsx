@@ -38,7 +38,7 @@ export function Sidebar({ isSuperAdmin }: { isSuperAdmin: boolean }) {
           <Link
             key={item.href}
             href={item.href}
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--color-foreground-muted)] transition-colors hover:bg-white/5 hover:text-[var(--color-foreground)]"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--color-foreground-muted)] transition-colors hover:bg-black/[0.04] hover:text-[var(--color-foreground)]"
           >
             <Icon name={item.icon} />
             {item.label}
@@ -50,7 +50,7 @@ export function Sidebar({ isSuperAdmin }: { isSuperAdmin: boolean }) {
             <span className="px-3 text-xs font-semibold uppercase tracking-wider text-[var(--color-foreground-subtle)]">Platform admin</span>
             <Link
               href="/admin"
-              className="mt-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--color-foreground-muted)] transition-colors hover:bg-white/5 hover:text-[var(--color-foreground)]"
+              className="mt-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--color-foreground-muted)] transition-colors hover:bg-black/[0.04] hover:text-[var(--color-foreground)]"
             >
               <Icon name="settings" />
               Admin console

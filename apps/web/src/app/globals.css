@@ -6,17 +6,25 @@
  * so this file is the CSS-side twin of that TS file — keep them in sync.
  */
 @theme {
-  --color-background: #0b0f1a;
-  --color-background-raised: #111827;
-  --color-border: rgba(148, 163, 184, 0.16);
-  --color-border-strong: rgba(148, 163, 184, 0.32);
-  --color-foreground: #e5e7eb;
-  --color-foreground-muted: #94a3b8;
-  /* Was #64748b (slate-500): only 4.02:1 against the page background —
-     fails WCAG 2.1 AA's 4.5:1 minimum for normal text, caught by the
-     Phase 4 automated accessibility pass (e2e/accessibility.spec.ts).
-     #7b8aa0 clears ~5.1:1 while staying visually dimmer than -muted. */
-  --color-foreground-subtle: #7b8aa0;
+  /* Off-white, professional light theme — warm near-white page background
+     with pure-white raised surfaces (cards read as a distinct, slightly
+     "lifted" layer above the page, the way Sentry's product UI does it),
+     dark ink text, and the same indigo -> violet -> cyan brand identity
+     from the logo, now used as accent color rather than as the whole
+     background. See packages/ui/tokens.ts — keep both files in sync. */
+  --color-background: #fafaf8;
+  --color-background-raised: #ffffff;
+  --color-border: rgba(15, 23, 42, 0.08);
+  --color-border-strong: rgba(15, 23, 42, 0.14);
+  --color-foreground: #14171c;
+  /* #475569 (slate-600): ~7.2:1 against the page background — comfortably
+     safe for secondary body text. */
+  --color-foreground-muted: #475569;
+  /* #64748b (slate-500): ~4.7:1 against the page background — clears
+     WCAG 2.1 AA's 4.5:1 minimum with a small margin (verified against the
+     exact #fafaf8 background, not a bare #ffffff assumption), used only
+     for the least prominent text (timestamps, captions). */
+  --color-foreground-subtle: #64748b;
 
   --color-brand-indigo: #6366f1;
   --color-brand-violet: #8b5cf6;
@@ -37,7 +45,7 @@
   }
 
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   body {
@@ -48,11 +56,11 @@
   }
 
   ::selection {
-    background-color: rgba(139, 92, 246, 0.35);
+    background-color: rgba(99, 102, 241, 0.18);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-brand-cyan);
+    outline: 2px solid var(--color-brand-indigo);
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -72,13 +80,12 @@
 
   .glass-card {
     background-color: var(--color-background-raised);
-    background-image: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
     border: 1px solid var(--color-border);
-    backdrop-filter: blur(12px);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.08);
   }
 
   .glow-blob {
-    background: radial-gradient(60% 60% at 50% 0%, rgba(139, 92, 246, 0.35) 0%, rgba(11, 15, 26, 0) 70%);
+    background: radial-gradient(60% 60% at 50% 0%, rgba(99, 102, 241, 0.14) 0%, rgba(99, 102, 241, 0) 70%);
   }
 }
 

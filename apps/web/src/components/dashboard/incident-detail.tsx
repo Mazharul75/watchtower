@@ -105,12 +105,12 @@ export function IncidentDetail({ incidentId, canApprove }: { incidentId: string;
           <div
             className="animate-fade-rise relative overflow-hidden rounded-2xl border p-6"
             style={{
-              borderColor: "rgba(139, 92, 246, 0.35)",
-              background: "linear-gradient(155deg, rgba(99,102,241,0.14), rgba(34,211,238,0.06))",
+              borderColor: "rgba(99, 102, 241, 0.25)",
+              background: "linear-gradient(155deg, rgba(99,102,241,0.08), rgba(34,211,238,0.04))",
             }}
           >
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-brand-cyan)]">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#4338CA]">
                 Why Watchtower thinks this happened
               </span>
               {incident.confidence != null && (
@@ -121,7 +121,7 @@ export function IncidentDetail({ incidentId, canApprove }: { incidentId: string;
             </div>
             <p className="text-lg font-semibold leading-snug text-[var(--color-foreground)]">{incident.hypothesis ?? "—"}</p>
             {incident.proposedFix && (
-              <p className="mt-3 border-t border-white/10 pt-3 text-sm leading-relaxed text-[var(--color-foreground-muted)]">
+              <p className="mt-3 border-t border-black/[0.06] pt-3 text-sm leading-relaxed text-[var(--color-foreground-muted)]">
                 <span className="font-medium text-[var(--color-foreground)]">Proposed approach: </span>
                 {incident.proposedFix}
               </p>
@@ -132,7 +132,7 @@ export function IncidentDetail({ incidentId, canApprove }: { incidentId: string;
             <div className="mb-2 flex items-center gap-2">
               <h2 className="text-sm font-semibold text-[var(--color-foreground-subtle)]">CITED EVIDENCE</h2>
               {incident.evidence.length > 0 && (
-                <span className="rounded-full bg-white/5 px-2 py-0.5 text-[11px] text-[var(--color-foreground-subtle)]">
+                <span className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[11px] text-[var(--color-foreground-subtle)]">
                   {incident.evidence.length} clickable source{incident.evidence.length === 1 ? "" : "s"}
                 </span>
               )}

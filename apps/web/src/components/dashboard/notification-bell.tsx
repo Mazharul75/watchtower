@@ -69,7 +69,7 @@ export function NotificationBell() {
         type="button"
         aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
         onClick={() => setOpen((o) => !o)}
-        className="relative flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-foreground-muted)] transition-colors hover:bg-white/5 hover:text-[var(--color-foreground)]"
+        className="relative flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-foreground-muted)] transition-colors hover:bg-black/[0.04] hover:text-[var(--color-foreground)]"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
           <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round" />
@@ -103,7 +103,7 @@ export function NotificationBell() {
               <ul className="divide-y divide-[var(--color-border)]">
                 {notifications.map((n) => {
                   const body = (
-                    <div className={`flex flex-col gap-0.5 px-4 py-3 ${n.readAt ? "" : "bg-white/[0.03]"}`}>
+                    <div className={`flex flex-col gap-0.5 px-4 py-3 ${n.readAt ? "" : "bg-[var(--color-brand-indigo)]/[0.06]"}`}>
                       <div className="flex items-start justify-between gap-2">
                         <p className="text-sm font-medium text-[var(--color-foreground)]">{n.title}</p>
                         {!n.readAt && <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[var(--color-brand-cyan)]" />}

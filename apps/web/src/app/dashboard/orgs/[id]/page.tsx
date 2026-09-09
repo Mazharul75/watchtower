@@ -123,7 +123,7 @@ export default async function OrgDetailPage({
         </div>
         <Link
           href={`/dashboard/orgs/${id}/settings`}
-          className="shrink-0 rounded-lg border border-[var(--color-border-strong)] px-3 py-2 text-sm text-[var(--color-foreground-muted)] transition-colors hover:bg-white/5 hover:text-[var(--color-foreground)]"
+          className="shrink-0 rounded-lg border border-[var(--color-border-strong)] px-3 py-2 text-sm text-[var(--color-foreground-muted)] transition-colors hover:bg-black/[0.04] hover:text-[var(--color-foreground)]"
         >
           Settings
         </Link>

@@ -33,12 +33,12 @@ export function PipelineAnimation() {
           100% { transform: translateX(${RAIL_LENGTH}px); opacity: 0; }
         }
         @keyframes wt-light {
-          0%, 14%, 100% { fill: #2a3346; r: 5; }
-          6%             { fill: #22D3EE; r: 7.5; }
+          0%, 14%, 100% { fill: #cbd5e1; r: 5; }
+          6%             { fill: #6366F1; r: 7.5; }
         }
         @keyframes wt-label {
-          0%, 14%, 100% { fill: #7b8aa0; }
-          6%             { fill: #E5E7EB; }
+          0%, 14%, 100% { fill: #64748b; }
+          6%             { fill: #14171c; }
         }
         .wt-runner { animation: wt-travel 6s cubic-bezier(0.45,0,0.15,1) infinite; }
         .wt-n0 { animation: wt-light 6s linear infinite; }
@@ -54,7 +54,7 @@ export function PipelineAnimation() {
         @media (prefers-reduced-motion: reduce) {
           .wt-runner { display: none; }
           .wt-n0, .wt-n1, .wt-n2, .wt-n3, .wt-n4 { fill: #6366F1 !important; r: 6 !important; animation: none; }
-          .wt-l0, .wt-l1, .wt-l2, .wt-l3, .wt-l4 { fill: #E5E7EB !important; animation: none; }
+          .wt-l0, .wt-l1, .wt-l2, .wt-l3, .wt-l4 { fill: #14171c !important; animation: none; }
         }
       `}</style>
 
@@ -67,13 +67,13 @@ export function PipelineAnimation() {
       </defs>
 
       <g transform="translate(20, 30)">
-        <line x1="0" y1="0" x2={RAIL_LENGTH} y2="0" stroke="#2a3346" strokeWidth="1.5" />
+        <line x1="0" y1="0" x2={RAIL_LENGTH} y2="0" stroke="#cbd5e1" strokeWidth="1.5" />
         <circle className="wt-runner" cx="0" cy="0" r="4" fill="url(#wt-pipeline-grad)" />
 
         {STAGES.map((s, i) => (
           <g key={s.key}>
-            <circle className={`wt-n${i}`} cx={s.x} cy="0" r="5" fill="#2a3346" />
-            <text className={`wt-l${i}`} x={s.x} y="26" textAnchor="middle" fontSize="11" fontWeight="500" fill="#7b8aa0">
+            <circle className={`wt-n${i}`} cx={s.x} cy="0" r="5" fill="#cbd5e1" />
+            <text className={`wt-l${i}`} x={s.x} y="26" textAnchor="middle" fontSize="11" fontWeight="500" fill="#64748b">
               {s.label}
             </text>
           </g>
@@ -81,8 +81,8 @@ export function PipelineAnimation() {
 
         {/* The human-approval gate — the one non-negotiable step — gets a
             permanent marker, not just a lit dot like the others. */}
-        <line x1="390" y1="-30" x2="390" y2="-10" stroke="#22D3EE" strokeWidth="1.2" />
-        <text x="390" y="-36" textAnchor="middle" fontSize="10" fontWeight="600" fill="#22D3EE">
+        <line x1="390" y1="-30" x2="390" y2="-10" stroke="#6366F1" strokeWidth="1.2" />
+        <text x="390" y="-36" textAnchor="middle" fontSize="10" fontWeight="600" fill="#4338CA">
           human gate
         </text>
       </g>
