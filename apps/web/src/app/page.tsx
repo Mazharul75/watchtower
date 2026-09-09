@@ -2,9 +2,26 @@ import { Navbar } from "@/components/site/navbar";
 import { Footer } from "@/components/site/footer";
 import { AmbientBackground } from "@/components/site/background";
 import { PipelineAnimation } from "@/components/site/pipeline-animation";
+import { WavyDivider } from "@/components/site/wavy-divider";
+import { FaqAccordion } from "@/components/site/faq-accordion";
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/alert";
+
+const PRINCIPLES = [
+  {
+    title: "Never fabricates",
+    description: "No hypothesis without cleared evidence. Short of that bar, it says so and stops — an honest abstention, not a confident guess.",
+  },
+  {
+    title: "Never merges",
+    description: "Every fix arrives as a draft PR. Nothing reaches your default branch without a human clicking approve.",
+  },
+  {
+    title: "Never hides its work",
+    description: "Every citation, every retrieval score, every status change is visible and auditable — not a black box.",
+  },
+];
 
 const FEATURES = [
   {
@@ -43,7 +60,7 @@ const STEPS = [
   { step: "01", title: "Create your account", description: "Sign up with email, GitHub, or Google. Verify your email and you're in." },
   { step: "02", title: "Create an organization", description: "Organizations group your repos and teammates, with owner/admin/member/viewer roles enforced on every request." },
   { step: "03", title: "Connect a repository", description: "Install the Watchtower GitHub App and watch your engineering graph populate automatically from real issues, PRs, and CI history." },
-  { step: "04", title: "Review and approve", description: "Coming in Phase 3: every AI-suggested fix arrives as a draft PR you approve — never an autonomous merge." },
+  { step: "04", title: "Review and approve", description: "Every AI-suggested fix arrives as a draft PR you approve — never an autonomous merge." },
 ];
 
 export default function LandingPage() {
@@ -55,9 +72,9 @@ export default function LandingPage() {
       <main>
         <section className="mx-auto max-w-6xl px-6 pb-24 pt-20 text-center md:pt-28">
           <div className="animate-fade-rise mx-auto mb-6 inline-flex">
-            <Badge tone="info">
-              <span className="mr-1.5 inline-block h-1.5 w-1.5 animate-pulse-soft rounded-full bg-[var(--color-brand-cyan)]" />
-              Phase 2 · GitHub Ingestion
+            <Badge tone="success">
+              <span className="mr-1.5 inline-block h-1.5 w-1.5 animate-pulse-soft rounded-full bg-[var(--color-success)]" />
+              All 4 phases live — deployed and running
             </Badge>
           </div>
           <h1
@@ -122,6 +139,31 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+        </section>
+
+        <WavyDivider />
+        <section className="bg-[#14171c] px-6 py-24 text-center text-white">
+          <div className="mx-auto mb-14 max-w-2xl">
+            <h2 className="text-3xl font-semibold tracking-tight">Three things Watchtower never does</h2>
+            <p className="mt-3 text-slate-400">The constraints that make the AI trustworthy, not just capable.</p>
+          </div>
+          <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
+            {PRINCIPLES.map((p) => (
+              <div key={p.title} className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left">
+                <h3 className="text-brand-gradient text-lg font-semibold">{p.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-400">{p.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+        <WavyDivider flip />
+
+        <section id="faq" className="mx-auto max-w-6xl px-6 py-24">
+          <div className="mx-auto mb-14 max-w-2xl text-center">
+            <h2 className="text-3xl font-semibold tracking-tight">Frequently asked</h2>
+            <p className="mt-3 text-[var(--color-foreground-muted)]">The questions that actually come up before someone connects a real repo.</p>
+          </div>
+          <FaqAccordion />
         </section>
 
         <section id="pricing" className="mx-auto max-w-4xl px-6 pb-28">

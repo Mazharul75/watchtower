@@ -15,6 +15,7 @@ export async function Navbar() {
         <nav className="hidden items-center gap-8 text-sm text-[var(--color-foreground-muted)] md:flex">
           <Link href="/#features" className="hover:text-[var(--color-foreground)]">Features</Link>
           <Link href="/#how-it-works" className="hover:text-[var(--color-foreground)]">How it works</Link>
+          <Link href="/#faq" className="hover:text-[var(--color-foreground)]">FAQ</Link>
           <Link href="/#pricing" className="hover:text-[var(--color-foreground)]">Pricing</Link>
         </nav>
         <div className="flex items-center gap-3">
