@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardHeader } from "@/components/ui/card";
 import { GraphViewer } from "@/components/dashboard/graph-viewer";
 import { IncidentsPanel } from "@/components/dashboard/incidents-panel";
+import { WebhookEventsPanel } from "@/components/dashboard/webhook-events-panel";
 
 export const metadata: Metadata = { title: "Engineering graph" };
 
@@ -48,6 +49,11 @@ export default async function RepoGraphPage({ params }: { params: Promise<{ id: 
           description="Auto-built from real issues, pull requests, and check runs — no manual entry."
         />
         <GraphViewer repositoryId={id} canInvestigate={canInvestigate} />
+      </Card>
+
+      <Card className="p-6">
+        <CardHeader title="Webhook activity" description="Raw deliveries GitHub has sent for this repository, most recent first." />
+        <WebhookEventsPanel repositoryId={id} />
       </Card>
     </div>
   );
