@@ -1,5 +1,6 @@
 import { signOutAction } from "@/app/actions/auth-actions";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export function Topbar({ name, email }: { name: string | null; email: string | null }) {
   return (
@@ -8,9 +9,12 @@ export function Topbar({ name, email }: { name: string | null; email: string | n
         <p className="text-sm font-medium text-[var(--color-foreground)]">{name ?? email}</p>
         {name && <p className="text-xs text-[var(--color-foreground-subtle)]">{email}</p>}
       </div>
-      <form action={signOutAction}>
-        <Button type="submit" variant="outline" size="sm">Sign out</Button>
-      </form>
+      <div className="flex items-center gap-2">
+        <NotificationBell />
+        <form action={signOutAction}>
+          <Button type="submit" variant="outline" size="sm">Sign out</Button>
+        </form>
+      </div>
     </header>
   );
 }
