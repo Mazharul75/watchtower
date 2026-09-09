@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/alert";
 import { SessionsPanel } from "@/components/dashboard/sessions-panel";
+import { ApiKeysPanel } from "@/components/dashboard/api-keys-panel";
+import { ProfileForm } from "@/components/dashboard/profile-form";
 
 export const metadata: Metadata = { title: "Account settings" };
 
@@ -28,9 +30,9 @@ export default async function SettingsPage() {
 
       <Card className="p-6">
         <CardHeader title="Profile" />
-        <dl className="grid grid-cols-[120px_1fr] gap-y-3 text-sm">
+        <dl className="grid grid-cols-[120px_1fr] items-center gap-y-3 text-sm">
           <dt className="text-[var(--color-foreground-subtle)]">Name</dt>
-          <dd>{session?.user.name ?? "—"}</dd>
+          <ProfileForm initialName={session.user.name ?? null} />
           <dt className="text-[var(--color-foreground-subtle)]">Username</dt>
           <dd>{session?.user.username ?? "—"}</dd>
           <dt className="text-[var(--color-foreground-subtle)]">Email</dt>
@@ -51,6 +53,11 @@ export default async function SettingsPage() {
       <Card className="p-6">
         <CardHeader title="Active sessions" description="Devices currently signed in to your account." />
         <SessionsPanel />
+      </Card>
+
+      <Card className="p-6">
+        <CardHeader title="API keys" description="For calling the Watchtower API from scripts, CI, or your own tools." />
+        <ApiKeysPanel />
       </Card>
     </div>
   );
