@@ -25,6 +25,56 @@ async def test_me_returns_the_authenticated_user(client, seeded_user):
     assert body["isSuperAdmin"] is False
 
 
+async def test_me_rejects_unknown_api_key(client):
+    res = await client.get("/me", headers={"Authorization": "Bearer wt_not-a-real-key"})
+    assert res.status_code == 401
+
+
+async def test_me_accepts_a_valid_api_key(client, db_session, seeded_user):
+    import hashlib
+    import uuid
+
+    from app.models import ApiKey
+
+    user, _session_token = seeded_user
+    raw_key = "wt_" + uuid.uuid4().hex
+    db_session.add(
+        ApiKey(
+            id=str(uuid.uuid4()),
+            keyHash=hashlib.sha256(raw_key.encode("utf-8")).hexdigest(),
+            userId=user.id,
+        )
+    )
+    await db_session.commit()
+
+    res = await client.get("/me", headers={"Authorization": f"Bearer {raw_key}"})
+    assert res.status_code == 200
+    assert res.json()["id"] == user.id
+
+
+async def test_me_rejects_a_revoked_api_key(client, db_session, seeded_user):
+    import hashlib
+    import uuid
+    from datetime import UTC, datetime
+
+    from app.models import ApiKey
+
+    user, _session_token = seeded_user
+    raw_key = "wt_" + uuid.uuid4().hex
+    db_session.add(
+        ApiKey(
+            id=str(uuid.uuid4()),
+            keyHash=hashlib.sha256(raw_key.encode("utf-8")).hexdigest(),
+            userId=user.id,
+            revokedAt=datetime.now(UTC),
+        )
+    )
+    await db_session.commit()
+
+    res = await client.get("/me", headers={"Authorization": f"Bearer {raw_key}"})
+    assert res.status_code == 401
+
+
 async def test_expired_session_is_rejected(client, db_session):
     import uuid
     from datetime import datetime, timedelta

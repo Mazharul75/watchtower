@@ -94,3 +94,23 @@ class FeatureFlag(Base):
     key: Mapped[str] = mapped_column(String, primary_key=True)
     enabled: Mapped[bool] = mapped_column(Boolean, default=False)
     description: Mapped[str | None] = mapped_column(String, nullable=True)
+
+
+class ApiKey(Base):
+    """
+    Personal API keys, created from the web app's Account settings page.
+    Only a SHA-256 hash of the raw key is ever stored — the raw value is
+    shown to the user exactly once, at creation time. Unlike password
+    hashing, this deliberately uses a fast deterministic hash (not Argon2):
+    the whole point of an API key is a cheap O(1) lookup-by-hash on every
+    request, and a key already carries 256 bits of its own randomness, so
+    it needs no salt/slow-hash defense the way a human-chosen password does.
+    """
+
+    __tablename__ = "ApiKey"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    keyHash: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    userId: Mapped[str] = mapped_column(String, ForeignKey("User.id"))
+    lastUsedAt: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    revokedAt: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
