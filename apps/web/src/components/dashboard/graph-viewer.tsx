@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Alert, Badge, Spinner } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { NodeGraphVisualization } from "@/components/dashboard/node-graph-visualization";
 
 interface GraphNodeDTO {
   id: string;
@@ -53,6 +54,7 @@ export function GraphViewer({ repositoryId, canInvestigate }: { repositoryId: st
   const [edges, setEdges] = useState<GraphEdgeDTO[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [investigatingId, setInvestigatingId] = useState<string | null>(null);
+  const [view, setView] = useState<"graph" | "list">("graph");
 
   useEffect(() => {
     fetch(`/api/repos/${repositoryId}/graph`)
@@ -117,8 +119,47 @@ export function GraphViewer({ repositoryId, canInvestigate }: { repositoryId: st
     return acc;
   }, {});
 
+  const viewToggle = (
+    <div className="mb-4 flex justify-end gap-1 rounded-lg border border-[var(--color-border)] bg-black/10 p-1">
+      <button
+        type="button"
+        onClick={() => setView("graph")}
+        className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+          view === "graph" ? "bg-white/10 text-[var(--color-foreground)]" : "text-[var(--color-foreground-subtle)] hover:text-[var(--color-foreground)]"
+        }`}
+      >
+        Graph view
+      </button>
+      <button
+        type="button"
+        onClick={() => setView("list")}
+        className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+          view === "list" ? "bg-white/10 text-[var(--color-foreground)]" : "text-[var(--color-foreground-subtle)] hover:text-[var(--color-foreground)]"
+        }`}
+      >
+        List view
+      </button>
+    </div>
+  );
+
+  if (view === "graph") {
+    return (
+      <div>
+        {viewToggle}
+        <NodeGraphVisualization
+          nodes={nodes}
+          edges={edges}
+          canInvestigate={canInvestigate}
+          investigatingId={investigatingId}
+          onInvestigate={investigate}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-8">
+      {viewToggle}
       {(Object.keys(TYPE_LABEL) as GraphNodeDTO["type"][])
         .filter((type) => grouped[type]?.length)
         .map((type) => (
