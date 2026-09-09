@@ -89,9 +89,24 @@ files should all be there.
    ```
    postgresql://postgres.xxxxxxxxxxxx:[YOUR-PASSWORD]@aws-0-xxxxx.pooler.supabase.com:6543/postgres
    ```
-8. Paste it somewhere temporary and **replace `[YOUR-PASSWORD]`** with the
-   real password you copied in step 3. This full string is your
-   **`DATABASE_URL`** — you'll need it in Part A4.
+8. Paste it somewhere temporary, **replace `[YOUR-PASSWORD]`** with the
+   real password you copied in step 3, and **add `?pgbouncer=true` to the
+   very end**. It should look like:
+   ```
+   postgresql://postgres.xxxxxxxxxxxx:yourpassword@aws-0-xxxxx.pooler.supabase.com:6543/postgres?pgbouncer=true
+   ```
+   This flag is required — without it, logins will randomly fail with a
+   `prepared statement "s5" already exists` error once your site gets more
+   than a trickle of traffic (Supabase's pooled connections get reused in
+   a way Prisma's default query mode doesn't expect; this flag tells it to
+   adjust). This full string is your **`DATABASE_URL`** — you'll need it
+   in Part A4 (Vercel).
+
+   **Keep this exact string, ending in `?pgbouncer=true`, for Vercel
+   only.** For the one-time commands you run from your own PC in Part
+   A10, you'll use the *same string with the port changed to `:5432` and
+   `?pgbouncer=true` removed* — that's covered there, don't change
+   anything here.
 
 ---
 
@@ -202,22 +217,40 @@ redirects, email links, etc.).
 
 ---
 
-## A8. Let the app send real emails (Resend)
+## A8. Let the app send real emails (Brevo)
 
 Without this step, verification/reset emails silently go nowhere in
 production — this step is required, not optional, for real users to be
 able to sign up.
 
-1. Go to **resend.com** → **Sign Up** (free tier: 3,000 emails/month, no
-   card required).
-2. Once logged in, go to **API Keys** in the left sidebar → **Create API
-   Key**. Name it anything, permission "Full access" is fine.
-3. Copy the key shown (starts with `re_`) — you only see it once. Save it.
+**Why Brevo and not Resend:** Resend's free tier only lets you send to
+the email address you signed up with, until you verify a whole domain you
+own (costs money — not an option here). Brevo's free tier (300
+emails/day, forever, no card required) lets you verify a single email
+address you already own — no domain needed — and once verified you can
+send to **anyone**, which is what you need for real testers to receive
+their signup/reset emails.
 
-That's enough to send real emails immediately, from Resend's own shared
-sending address — good enough to get started. (Later, if you want emails
-to come from your own name/domain, you can verify a domain under
-**Domains** in Resend — not required for now.)
+1. Go to **brevo.com** → **Sign up free**. Use whichever email you want
+   your app's emails to appear to come from (e.g. your own Gmail).
+2. Verify your Brevo account itself (Brevo emails you a confirmation
+   link — click it).
+3. **Verify your sending address:** in the Brevo dashboard, go to
+   **Senders, Domains & Dedicated IPs** (left sidebar, or under your
+   account menu) → **Senders** tab → **Add a Sender**. Enter a name
+   (e.g. `Watchtower`) and the same email you signed up with → **Save**.
+   Brevo sends a confirmation email to that address — open it and click
+   the verification link. The sender now shows a green "Verified" badge.
+4. **Get your SMTP credentials:** still in **Senders, Domains & Dedicated
+   IPs**, click the **SMTP & API** tab. Under **SMTP**, you'll see:
+   - **SMTP server:** `smtp-relay.brevo.com`
+   - **Port:** `587`
+   - **Login:** your Brevo account email
+   - Click **Generate a new SMTP key** (if none exists yet), name it
+     anything, and copy the key shown — you only see it once. Save it.
+
+Keep these five values handy for A9: the SMTP server, port, login email,
+the SMTP key, and the verified sender email.
 
 ---
 
@@ -235,8 +268,17 @@ Add each of these (for `NEXTAUTH_URL`, edit the one you already added):
 | `GITHUB_CLIENT_SECRET` | from A6 |
 | `GOOGLE_CLIENT_ID` | from A7 |
 | `GOOGLE_CLIENT_SECRET` | from A7 |
-| `RESEND_API_KEY` | from A8 |
-| `EMAIL_FROM` | `Watchtower <onboarding@resend.dev>` (Resend's free shared sender — works immediately) |
+| `SMTP_HOST` | `smtp-relay.brevo.com` |
+| `SMTP_PORT` | `587` |
+| `SMTP_SECURE` | `false` |
+| `SMTP_USER` | your Brevo account email, from A8 |
+| `SMTP_PASSWORD` | the SMTP key you generated in A8 |
+| `EMAIL_FROM` | `Watchtower <your-verified-sender-email>` — **must be the exact email you verified as a Sender in A8**, or Brevo will reject the send |
+
+**If you previously added `RESEND_API_KEY`:** delete that variable
+entirely (⋯ → Remove) rather than leaving it — the app checks for it
+first, so as long as it's set, it'll keep trying Resend instead of using
+the Brevo/SMTP values above.
 
 After adding all of these: go to **Deployments** → **⋯** on the latest one
 → **Redeploy**, so the app picks them up.
@@ -248,40 +290,89 @@ After adding all of these: go to **Deployments** → **⋯** on the latest one
 This is a one-time step, run from your own computer, that sets up the
 actual tables in your Supabase database and creates your first login.
 
-1. Open a terminal in your project folder:
-   ```bash
-   cd apps/web
-   ```
-2. Set your live database address for just this terminal session
-   (replace with your real A2 connection string):
+**Important — a different port than the one you used for Vercel:** the
+`:6543` connection string from A2 is for the live app only. Migrations
+need a plain, single, stable connection, which that pooled port doesn't
+give — it just hangs forever with no error message if you try. Use the
+exact same connection string but with **`:5432`** instead of `:6543`
+for every command below. (Don't change anything in Vercel — Vercel keeps
+`:6543`.)
 
-   **If you're using Git Bash / Mac / Linux:**
-   ```bash
-   export DATABASE_URL="postgresql://postgres.xxxx:yourpassword@....supabase.com:6543/postgres"
+**Which terminal are you using?** Look at your prompt:
+- Ends in `>` (e.g. `C:\...>`) → you're in **Command Prompt (cmd)** — use
+  the "Command Prompt" commands below.
+- Starts with `PS ` (e.g. `PS C:\...>`) → you're in **PowerShell** — use
+  the "PowerShell" commands below.
+- Shows something like `user@machine MINGW64 ~` → you're in **Git Bash** —
+  use the "Git Bash" commands below.
+
+Any of the three works fine — just don't mix syntax from one into another
+(that's what caused the errors: PowerShell's `$env:` and Bash's `export`
+don't mean anything to Command Prompt).
+
+1. Go to your project's web folder. Copy-paste the line matching your
+   terminal (this works no matter where you currently are):
+
+   **Command Prompt:**
+   ```bat
+   cd /d E:\NEW_project\apps\web
    ```
-   **If you're using Windows PowerShell:**
+   **PowerShell:**
    ```powershell
-   $env:DATABASE_URL = "postgresql://postgres.xxxx:yourpassword@....supabase.com:6543/postgres"
+   Set-Location E:\NEW_project\apps\web
    ```
+   **Git Bash:**
+   ```bash
+   cd /e/NEW_project/apps/web
+   ```
+
+2. Set your database address for just this terminal session — replace the
+   example with your real A2 connection string, **with the port changed
+   to `5432`**:
+
+   **Command Prompt:**
+   ```bat
+   set "DATABASE_URL=postgresql://postgres.xxxx:yourpassword@....supabase.com:5432/postgres"
+   ```
+   **PowerShell:**
+   ```powershell
+   $env:DATABASE_URL = "postgresql://postgres.xxxx:yourpassword@....supabase.com:5432/postgres"
+   ```
+   **Git Bash:**
+   ```bash
+   export DATABASE_URL="postgresql://postgres.xxxx:yourpassword@....supabase.com:5432/postgres"
+   ```
+
+   If your database password contains special characters (`&`, `!`, `%`,
+   etc.), keep the whole value inside the double quotes exactly as shown
+   above — that's enough to make them safe in all three shells.
 
 3. Create the tables:
    ```bash
    npx prisma migrate deploy
    ```
-   You should see "All migrations have been successfully applied."
+   You should see "All migrations have been successfully applied" within
+   a few seconds. If it just sits there doing nothing for more than
+   30 seconds, press `Ctrl+C`, double check the port is `5432` (not
+   `6543`), and try again.
 
 4. Create your admin account. First, set the email/password you actually
-   want to log in with (still the same terminal session):
+   want to log in with (still the same terminal, same session):
 
-   **Git Bash:**
-   ```bash
-   export SEED_ADMIN_EMAIL="your-real-email@example.com"
-   export SEED_ADMIN_PASSWORD="ChooseAStrongPassword123!"
+   **Command Prompt:**
+   ```bat
+   set "SEED_ADMIN_EMAIL=your-real-email@example.com"
+   set "SEED_ADMIN_PASSWORD=ChooseAStrongPassword123!"
    ```
    **PowerShell:**
    ```powershell
    $env:SEED_ADMIN_EMAIL = "your-real-email@example.com"
    $env:SEED_ADMIN_PASSWORD = "ChooseAStrongPassword123!"
+   ```
+   **Git Bash:**
+   ```bash
+   export SEED_ADMIN_EMAIL="your-real-email@example.com"
+   export SEED_ADMIN_PASSWORD="ChooseAStrongPassword123!"
    ```
 
 5. Run the seed script:
@@ -359,6 +450,17 @@ A6 — this one is a **GitHub App**, not an OAuth App.
    - **Checks**: Read-only
 4. Under **Subscribe to events**, check: **Issues**, **Pull request**,
    **Check run**.
+4b. Scroll up to the **Post installation** section (it's above Webhook,
+    below "Identifying and authorizing users") and set:
+   - **Setup URL**: your Vercel address + `/api/github/callback`
+   - Check **☑ Redirect on update**
+
+   **This step is easy to miss and the app won't work without it** — it's
+   what tells GitHub to send the browser back to your app (so it can save
+   the connected repos) after someone finishes installing. Without it,
+   clicking "Connect a repository" will send you to GitHub, the install
+   will appear to complete, but nothing comes back — no repos will ever
+   show up as connected.
 5. "Where can this GitHub App be installed": choose whichever you prefer
    (Only on this account is simplest for personal use).
 6. Click **Create GitHub App**.
@@ -397,7 +499,7 @@ A6 — this one is a **GitHub App**, not an OAuth App.
    these one at a time:
    | Name | Value |
    |---|---|
-   | `DATABASE_URL` | your real Supabase connection string from A2 |
+   | `DATABASE_URL` | your A2 connection string, but with port `5432` instead of `6543` and no `?pgbouncer=true` — same reasoning as Part A10: a real backup dump needs a stable connection, not the pooled one |
    | `B2_APPLICATION_KEY_ID` | the keyID from step 3 |
    | `B2_APPLICATION_KEY` | the applicationKey from step 3 |
    | `B2_BUCKET` | your bucket's name |
@@ -445,7 +547,7 @@ deploying this.** Only do this if you're curious to see it running:
 4. Add environment variables (from `apps/api/.env.example`):
    | Name | Value |
    |---|---|
-   | `DATABASE_URL` | your Supabase string, but starting with `postgresql+asyncpg://` instead of `postgresql://` (just change that one word at the start) |
+   | `DATABASE_URL` | your Supabase string, starting with `postgresql+asyncpg://` instead of `postgresql://`, port `5432` instead of `6543`, and no `?pgbouncer=true` (that flag is a Prisma-specific fix — this service uses a different database library that doesn't need it, and works better on the session port) |
    | `ENVIRONMENT` | `production` |
    | `CORS_ORIGINS` | your Vercel address |
 5. Click **Create Web Service**. Free tier note: it goes to sleep after 15
@@ -463,8 +565,8 @@ deploying this.** Only do this if you're curious to see it running:
 | `NEXTAUTH_URL` | ✅ Required | Your Vercel address (A4/A5) |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | ✅ Required | GitHub OAuth App (A6) |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | ✅ Required | Google Cloud (A7) |
-| `RESEND_API_KEY` | ✅ Required | Resend (A8) |
-| `EMAIL_FROM` | ✅ Required | Any name + `onboarding@resend.dev` (A9) |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASSWORD` | ✅ Required | Brevo (A8) |
+| `EMAIL_FROM` | ✅ Required | Any name + your verified Brevo sender email (A8/A9) |
 | `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` | Optional | Sentry (B1) |
 | `GITHUB_APP_SLUG` / `GITHUB_APP_ID` / `GITHUB_APP_PRIVATE_KEY` / `GITHUB_APP_WEBHOOK_SECRET` | Optional | GitHub App (B2) |
 | `LLM_PROVIDER` / `OLLAMA_BASE_URL` / `OLLAMA_MODEL` | Optional | Ollama (B4) |
