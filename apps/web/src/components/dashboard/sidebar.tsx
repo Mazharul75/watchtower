@@ -27,7 +27,11 @@ export function Sidebar({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   return (
     <aside className="hidden w-64 shrink-0 border-r border-[var(--color-border)] bg-[var(--color-background-raised)]/50 md:flex md:flex-col">
       <div className="flex h-16 items-center border-b border-[var(--color-border)] px-6">
-        <Link href="/"><LogoWordmark size={16} /></Link>
+        {/* Logged-in users click the brand mark expecting to stay inside the
+            app, not land on the public marketing site — sending them to "/"
+            looked exactly like an unexplained logout even though the session
+            was untouched, since "/" shows Login/Signup buttons by default. */}
+        <Link href="/dashboard"><LogoWordmark size={16} /></Link>
       </div>
       <nav className="flex flex-1 flex-col gap-1 p-4">
         {NAV.map((item) => (
