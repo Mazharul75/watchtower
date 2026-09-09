@@ -8,6 +8,7 @@ import { Alert, Badge } from "@/components/ui/alert";
 import { ReposPanel } from "@/components/dashboard/repos-panel";
 import { MembersPanel } from "@/components/dashboard/members-panel";
 import { AnimatedNumber } from "@/components/ui/animated-number";
+import { IncidentTrendChart } from "@/components/dashboard/incident-trend-chart";
 
 export const metadata: Metadata = { title: "Organization" };
 
@@ -40,8 +41,10 @@ export default async function OrgDetailPage({
   if (!membership) notFound();
 
   const canManage = membership.role === "OWNER" || membership.role === "ADMIN";
+  const fourteenDaysAgo = new Date();
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
-  const [flag, repoCount, memberCount, repos, incidentCounts, recentIncidents] = await Promise.all([
+  const [flag, repoCount, memberCount, repos, incidentCounts, recentIncidents, recentIncidentDates] = await Promise.all([
     prisma.featureFlag.findUnique({ where: { key: "phase2.github_ingestion" } }),
     prisma.repository.count({ where: { organizationId: id } }),
     prisma.organizationMember.count({ where: { organizationId: id } }),
@@ -59,6 +62,10 @@ export default async function OrgDetailPage({
         repository: { select: { fullName: true } },
         triggerNode: { select: { type: true, externalId: true, title: true } },
       },
+    }),
+    prisma.incident.findMany({
+      where: { repository: { organizationId: id }, createdAt: { gte: fourteenDaysAgo } },
+      select: { createdAt: true },
     }),
   ]);
 
@@ -92,11 +99,34 @@ export default async function OrgDetailPage({
     { label: "Resolved incidents", value: resolvedIncidents },
   ];
 
+  // Bucket real incident timestamps into a 14-day series, oldest first —
+  // an all-zero fortnight still renders as a flat, honest baseline rather
+  // than hiding the chart, since "no incidents" is itself real information.
+  const trendDays = Array.from({ length: 14 }, (_, i) => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() - (13 - i));
+    const count = recentIncidentDates.filter((inc) => {
+      const d = new Date(inc.createdAt);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime() === date.getTime();
+    }).length;
+    return { label: date.toLocaleDateString(undefined, { month: "short", day: "numeric" }), count };
+  });
+
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-semibold">{membership.organization.name}</h1>
-        <p className="mt-1 text-[var(--color-foreground-muted)]">/{membership.organization.slug}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold">{membership.organization.name}</h1>
+          <p className="mt-1 text-[var(--color-foreground-muted)]">/{membership.organization.slug}</p>
+        </div>
+        <Link
+          href={`/dashboard/orgs/${id}/settings`}
+          className="shrink-0 rounded-lg border border-[var(--color-border-strong)] px-3 py-2 text-sm text-[var(--color-foreground-muted)] transition-colors hover:bg-white/5 hover:text-[var(--color-foreground)]"
+        >
+          Settings
+        </Link>
       </div>
 
       {github_error && <Alert tone="danger">{github_error}</Alert>}
@@ -111,6 +141,11 @@ export default async function OrgDetailPage({
           </Card>
         ))}
       </div>
+
+      <Card className="p-6">
+        <CardHeader title="Incident activity" description="Investigations started per day, last 14 days." />
+        <IncidentTrendChart days={trendDays} />
+      </Card>
 
       <Card className="p-6">
         <CardHeader

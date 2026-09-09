@@ -56,24 +56,37 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 export async function DELETE(_request: Request, context: { params: Promise<{ id: string; userId: string }> }) {
   try {
     const { id: organizationId, userId: targetUserId } = await context.params;
-    const { user: actor, membership } = await requireOrgRole(organizationId, "ADMIN");
+    // Lowest bar (VIEWER) here — just proof of real membership — because a
+    // member leaving on their own doesn't need ADMIN. Removing someone ELSE
+    // still requires ADMIN, checked below once we know which case this is.
+    const { user: actor, membership } = await requireOrgRole(organizationId, "VIEWER");
+    const isSelfLeaving = actor.id === targetUserId;
 
     const target = await prisma.organizationMember.findUnique({
       where: { organizationId_userId: { organizationId, userId: targetUserId } },
     });
     if (!target) return NextResponse.json({ error: "Member not found" }, { status: 404 });
 
-    // An ADMIN may remove MEMBER/VIEWER, but not another ADMIN or an OWNER —
-    // only an OWNER can do that. Prevents an ADMIN from clearing out peers.
-    if (target.role === "ADMIN" && membership.role !== "OWNER") {
-      return NextResponse.json({ error: "Only an owner can remove an admin." }, { status: 403 });
+    if (!isSelfLeaving) {
+      if (membership.role !== "OWNER" && membership.role !== "ADMIN") {
+        return NextResponse.json({ error: "Requires ADMIN role or higher in this organization" }, { status: 403 });
+      }
+      // An ADMIN may remove MEMBER/VIEWER, but not another ADMIN or an
+      // OWNER — only an OWNER can do that. Prevents an ADMIN from clearing
+      // out peers.
+      if (target.role === "ADMIN" && membership.role !== "OWNER") {
+        return NextResponse.json({ error: "Only an owner can remove an admin." }, { status: 403 });
+      }
     }
     if (target.role === "OWNER") {
-      if (membership.role !== "OWNER") {
+      if (!isSelfLeaving && membership.role !== "OWNER") {
         return NextResponse.json({ error: "Only an owner can remove another owner." }, { status: 403 });
       }
       if ((await countOwners(organizationId)) <= 1) {
-        return NextResponse.json({ error: "Can't remove the only owner. Transfer ownership first." }, { status: 400 });
+        return NextResponse.json(
+          { error: isSelfLeaving ? "You're the only owner — transfer ownership before leaving." : "Can't remove the only owner. Transfer ownership first." },
+          { status: 400 },
+        );
       }
     }
 
@@ -83,7 +96,7 @@ export async function DELETE(_request: Request, context: { params: Promise<{ id:
 
     await writeAuditLog({
       actorId: actor.id,
-      action: "org.member.removed",
+      action: isSelfLeaving ? "org.member.left" : "org.member.removed",
       targetType: "Organization",
       targetId: organizationId,
       metadata: { targetUserId, role: target.role },
