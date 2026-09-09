@@ -109,7 +109,7 @@ export function OrgSettingsPanel({ organizationId, organizationName, currentUser
               {renamePending && <Spinner />}
               Save
             </Button>
-            {renameSaved && <span className="text-sm text-[var(--color-success)]">Saved.</span>}
+            {renameSaved && <span className="text-sm text-[var(--color-success-text)]">Saved.</span>}
           </form>
         ) : (
           <p className="text-sm text-[var(--color-foreground-subtle)]">Only an owner can rename this organization.</p>

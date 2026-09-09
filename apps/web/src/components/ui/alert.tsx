@@ -4,10 +4,10 @@ type Tone = "danger" | "success" | "info" | "warning";
 // dark theme needs (there, a light pastel reads on a dark tint). These are
 // picked for >=4.5:1 contrast against their own tone's ~10%-alpha tint.
 const toneStyles: Record<Tone, string> = {
-  danger: "bg-[var(--color-danger)]/10 border-[var(--color-danger)]/30 text-[#B91C3C]",
-  success: "bg-[var(--color-success)]/10 border-[var(--color-success)]/30 text-[#047857]",
-  info: "bg-[var(--color-info)]/10 border-[var(--color-info)]/30 text-[#0369A1]",
-  warning: "bg-[var(--color-warning)]/10 border-[var(--color-warning)]/30 text-[#B45309]",
+  danger: "bg-[var(--color-danger)]/10 border-[var(--color-danger)]/30 text-[var(--color-danger-text)]",
+  success: "bg-[var(--color-success)]/10 border-[var(--color-success)]/30 text-[var(--color-success-text)]",
+  info: "bg-[var(--color-info)]/10 border-[var(--color-info)]/30 text-[var(--color-info-text)]",
+  warning: "bg-[var(--color-warning)]/10 border-[var(--color-warning)]/30 text-[var(--color-warning-text)]",
 };
 
 export function Alert({ tone = "info", children }: { tone?: Tone; children: React.ReactNode }) {

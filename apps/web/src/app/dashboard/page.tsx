@@ -66,7 +66,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {stats.map((s) => (
           <Card key={s.label} className="p-5">
-            <p className={`text-2xl font-semibold tabular-nums ${s.tone === "warning" ? "text-[var(--color-warning)]" : "text-[var(--color-foreground)]"}`}>
+            <p className={`text-2xl font-semibold tabular-nums ${s.tone === "warning" ? "text-[var(--color-warning-text)]" : "text-[var(--color-foreground)]"}`}>
               <AnimatedNumber value={s.value} />
             </p>
             <p className="mt-1 text-xs text-[var(--color-foreground-subtle)]">{s.label}</p>

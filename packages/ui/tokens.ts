@@ -46,6 +46,15 @@ export const colors = {
     danger: "#F43F5E",
     info: "#38BDF8",
   },
+  // Dark, saturated variants of the four above — all >=5:1 against pure
+  // white. The semantic colors are tuned for fills/badges/icons, not
+  // readable text; use these instead anywhere a semantic color is text.
+  semanticText: {
+    success: "#047857",
+    warning: "#B45309",
+    danger: "#B91C3C",
+    info: "#0369A1",
+  },
 } as const;
 
 export const gradients = {

@@ -21,5 +21,5 @@ export function Label({ children, htmlFor }: { children: React.ReactNode; htmlFo
 
 export function FieldError({ children }: { children?: string | null }) {
   if (!children) return null;
-  return <p className="mt-1.5 text-sm text-[var(--color-danger)]">{children}</p>;
+  return <p className="mt-1.5 text-sm text-[var(--color-danger-text)]">{children}</p>;
 }
