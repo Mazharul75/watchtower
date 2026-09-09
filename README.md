@@ -1,15 +1,26 @@
+<p align="center">
+  <img src="docs/assets/banner.svg" alt="Watchtower — an AI engineering memory for GitHub repos" width="100%" />
+</p>
+
+<p align="center">
+  <a href="https://github.com/Mazharul75/watchtower/actions/workflows/ci.yml"><img src="https://github.com/Mazharul75/watchtower/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
+  <img src="https://img.shields.io/badge/license-MIT-8B5CF6" alt="MIT licensed" />
+  <img src="https://img.shields.io/badge/cost-%240%20to%20run-22D3EE" alt="Zero cost to run" />
+  <img src="https://img.shields.io/badge/phases-4%2F4%20complete-6366F1" alt="4 of 4 phases complete" />
+</p>
+
 # Watchtower
 
 > An AI engineering memory for GitHub repos — finds the root cause, cites the
 > evidence, remembers every incident, and waits for your approval before
 > touching anything.
 
-This repository currently implements **all 4 phases**: platform/identity,
-GitHub ingestion + engineering graph, AI root-cause analysis + incident
-memory, and Phase 4's hardening (admin completion, accessibility, backups,
-threat model, legal docs, launch checklist). It has not been deployed —
-that requires accounts only you can create; see the completion report /
-Launch checklist for the exact steps.
+This repository implements **all 4 phases**: platform/identity, GitHub
+ingestion + engineering graph, AI root-cause analysis + incident memory, and
+Phase 4's hardening (admin completion, accessibility, backups, threat model,
+legal docs, launch checklist) — and is deployed and running. Follow
+[`docs/SETUP_FROM_SCRATCH.md`](docs/SETUP_FROM_SCRATCH.md) for the exact,
+zero-cost path from an empty GitHub account to your own live instance.
 
 ## What's actually working right now
 

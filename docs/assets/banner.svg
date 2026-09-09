@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300" role="img" aria-labelledby="wt-t wt-d">
+  <title id="wt-t">Watchtower — an AI engineering memory for GitHub repos</title>
+  <desc id="wt-d">Detect, investigate, propose, approve, verify: the incident lifecycle, with a pulse travelling along it and a permanent human-approval gate.</desc>
+
+  <style>
+    .ink   { fill: #E5E7EB; }
+    .ink2  { fill: #94A3B8; }
+    .ink3  { fill: #7b8aa0; }
+    .cyan  { fill: #22D3EE; }
+    .sans  { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif; }
+    .mono  { font-family: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace; }
+
+    .wordmark { font-size: 72px; font-weight: 700; letter-spacing: -2.5px; }
+    .tagline  { font-size: 18px; font-weight: 400; }
+    .kicker   { font-size: 12px; font-weight: 600; letter-spacing: 2.4px; }
+    .stage    { font-size: 12px; font-weight: 500; }
+    .meta     { font-size: 11px; }
+
+    @keyframes travel {
+      0%   { transform: translateX(0);    opacity: 0; }
+      6%   {                              opacity: 1; }
+      94%  {                              opacity: 1; }
+      100% { transform: translateX(460px); opacity: 0; }
+    }
+    @keyframes light {
+      0%, 12%, 100% { fill: #2a3346; r: 6; }
+      4%            { fill: #22D3EE; r: 8.5; }
+    }
+    @keyframes labelLight {
+      0%, 12%, 100% { fill: #7b8aa0; }
+      4%            { fill: #E5E7EB; }
+    }
+    @keyframes beat {
+      0%, 100% { opacity: 1;    transform: scale(1); }
+      50%      { opacity: 0.4;  transform: scale(0.82); }
+    }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+
+    .runner  { animation: travel 6s cubic-bezier(0.45,0,0.15,1) infinite; }
+    .pulse   { animation: beat 2.6s ease-in-out infinite; transform-origin: 62px 96px; }
+    .rail    { stroke-dasharray: 460; stroke-dashoffset: 460; animation: draw 1.4s ease-out forwards; }
+
+    .n0 { animation: light 6s linear infinite; }
+    .n1 { animation: light 6s linear infinite 1.2s; }
+    .n2 { animation: light 6s linear infinite 2.4s; }
+    .n3 { animation: light 6s linear infinite 3.6s; }
+    .n4 { animation: light 6s linear infinite 4.8s; }
+    .l0 { animation: labelLight 6s linear infinite; }
+    .l1 { animation: labelLight 6s linear infinite 1.2s; }
+    .l2 { animation: labelLight 6s linear infinite 2.4s; }
+    .l3 { animation: labelLight 6s linear infinite 3.6s; }
+    .l4 { animation: labelLight 6s linear infinite 4.8s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .runner, .pulse, .rail, .n0, .n1, .n2, .n3, .n4, .l0, .l1, .l2, .l3, .l4 { animation: none; }
+      .rail { stroke-dashoffset: 0; }
+      .runner { opacity: 0; }
+    }
+  </style>
+
+  <defs>
+    <linearGradient id="wt-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366F1" />
+      <stop offset="50%" stop-color="#8B5CF6" />
+      <stop offset="100%" stop-color="#22D3EE" />
+    </linearGradient>
+    <pattern id="wt-grid" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="#1c2333" />
+    </pattern>
+    <linearGradient id="wt-fade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0B0F1A" stop-opacity="0" />
+      <stop offset="70%" stop-color="#0B0F1A" stop-opacity="0.7" />
+      <stop offset="100%" stop-color="#0B0F1A" stop-opacity="1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="300" fill="#0B0F1A" />
+  <rect width="1200" height="300" fill="url(#wt-grid)" opacity="0.6" />
+  <rect x="600" width="600" height="300" fill="url(#wt-fade)" />
+
+  <!-- Left: identity -->
+  <g class="sans">
+    <g class="pulse">
+      <path d="M62 84 L79 90 V102 C79 110.5 71.7 117 62 120 C52.3 117 45 110.5 45 102 V90 Z" fill="url(#wt-grad)" opacity="0.9" />
+    </g>
+    <text class="ink3 kicker" x="82" y="101">AI ENGINEERING MEMORY</text>
+    <text class="ink wordmark" x="58" y="176">Watchtower</text>
+    <text class="ink2 tagline" x="62" y="214">Finds the cause. Cites the evidence. Waits for your approval.</text>
+    <text class="ink3 meta mono" x="62" y="246">
+      auto-built engineering graph &#183; hybrid retrieval &#183; cited root-cause analysis &#183; human gate
+    </text>
+  </g>
+
+  <!-- Right: the real incident lifecycle -->
+  <g transform="translate(660, 150)">
+    <line class="rail" x1="0" y1="0" x2="460" y2="0" stroke="#2a3346" stroke-width="1.5" />
+    <circle class="runner" cx="0" cy="0" r="4" fill="url(#wt-grad)" />
+
+    <g class="sans">
+      <circle class="n0" cx="0" cy="0" r="6" fill="#2a3346" />
+      <text class="l0 stage" x="0" y="30" text-anchor="middle" fill="#7b8aa0">Detect</text>
+
+      <circle class="n1" cx="115" cy="0" r="6" fill="#2a3346" />
+      <text class="l1 stage" x="115" y="30" text-anchor="middle" fill="#7b8aa0">Investigate</text>
+
+      <circle class="n2" cx="230" cy="0" r="6" fill="#2a3346" />
+      <text class="l2 stage" x="230" y="30" text-anchor="middle" fill="#7b8aa0">Propose</text>
+
+      <circle class="n3" cx="345" cy="0" r="6" fill="#2a3346" />
+      <text class="l3 stage" x="345" y="30" text-anchor="middle" fill="#7b8aa0">Approve</text>
+
+      <circle class="n4" cx="460" cy="0" r="6" fill="#2a3346" />
+      <text class="l4 stage" x="460" y="30" text-anchor="middle" fill="#7b8aa0">Verify</text>
+    </g>
+
+    <g class="sans">
+      <line x1="345" y1="-34" x2="345" y2="-12" stroke="#22D3EE" stroke-width="1.2" />
+      <text class="cyan" x="345" y="-42" text-anchor="middle" font-size="11" font-weight="600">
+        human gate — never skipped
+      </text>
+    </g>
+  </g>
+</svg>
