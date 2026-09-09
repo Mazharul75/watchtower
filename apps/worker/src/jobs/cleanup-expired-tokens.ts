@@ -19,10 +19,21 @@ interface DeleteManyResult {
   count: number;
 }
 
+// `args` is deliberately `any`, not `unknown`: this interface exists only so
+// the job function below can be unit-tested against a plain stub instead of
+// a full PrismaClient, and TypeScript's structural typing is contravariant
+// on function parameters — a method typed to accept `unknown` can never be
+// satisfied by PrismaClient's real `deleteMany`, which expects a specific
+// `{ where?: ... }` shape per model. `any` is the correct escape hatch here;
+// the actual `where` clauses below are still fully type-checked by Prisma's
+// generated client at the call site in index.ts.
 interface PrismaLike {
-  session: { deleteMany: (args: unknown) => Promise<DeleteManyResult> };
-  verificationToken: { deleteMany: (args: unknown) => Promise<DeleteManyResult> };
-  passwordResetToken: { deleteMany: (args: unknown) => Promise<DeleteManyResult> };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  session: { deleteMany: (args: any) => Promise<DeleteManyResult> };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  verificationToken: { deleteMany: (args: any) => Promise<DeleteManyResult> };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  passwordResetToken: { deleteMany: (args: any) => Promise<DeleteManyResult> };
 }
 
 export interface CleanupSummary {
