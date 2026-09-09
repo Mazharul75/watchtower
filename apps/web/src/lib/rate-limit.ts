@@ -62,4 +62,8 @@ export const RATE_LIMITS = {
   register: { limit: 5, windowMs: 15 * 60 * 1000 },
   forgotPassword: { limit: 4, windowMs: 15 * 60 * 1000 },
   resetPassword: { limit: 8, windowMs: 15 * 60 * 1000 },
+  // Generous — a real app under load can legitimately burst-report the
+  // same error many times; this exists to stop abuse of a public
+  // unauthenticated endpoint, not to throttle normal error reporting.
+  errorIngest: { limit: 120, windowMs: 60 * 1000 },
 } as const;

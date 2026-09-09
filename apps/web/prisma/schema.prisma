@@ -122,8 +122,9 @@ model Organization {
   // in-app Notification rows those events already write.
   slackWebhookUrl String?
 
-  members      OrganizationMember[]
-  repositories Repository[]
+  members         OrganizationMember[]
+  repositories    Repository[]
+  ingestProjects  IngestProject[]
 
   @@index([slug])
 }
@@ -415,4 +416,72 @@ model Notification {
 
   @@index([userId])
   @@index([userId, readAt])
+}
+
+// ---------- Error Tracking — a standalone product, not a GitHub feature.
+// Any app (not necessarily one connected to GitHub at all) reports its
+// runtime errors here via a tiny snippet using an IngestProject's public
+// key. Events are grouped into ErrorGroups by a fingerprint (level +
+// normalized message), the same "dedupe by signature" approach real error
+// trackers use, so a hundred occurrences of the same bug show as one
+// group with a count, not a hundred separate rows to scroll through. ----------
+
+model IngestProject {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  // The "DSN" equivalent — public by design (it only allows writing new
+  // error events, never reading anything), embedded directly in the
+  // client-side snippet. Revoking access means regenerating this key.
+  publicKey      String   @unique @default(cuid())
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  errorGroups  ErrorGroup[]
+
+  @@index([organizationId])
+}
+
+enum ErrorLevel {
+  ERROR
+  WARNING
+  INFO
+}
+
+model ErrorGroup {
+  id          String     @id @default(cuid())
+  projectId   String
+  fingerprint String // deterministic hash of level + normalized message — how repeat occurrences are recognized as "the same error"
+  title       String // first line of the message, shown in the list
+  level       ErrorLevel
+  environment String     @default("production")
+  count       Int        @default(1)
+  firstSeenAt DateTime   @default(now())
+  lastSeenAt  DateTime   @default(now())
+  resolvedAt  DateTime?
+  muted       Boolean    @default(false)
+
+  project IngestProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  events  ErrorEvent[]
+
+  @@unique([projectId, fingerprint])
+  @@index([projectId])
+  @@index([projectId, resolvedAt])
+}
+
+model ErrorEvent {
+  id         String   @id @default(cuid())
+  groupId    String
+  message    String   @db.Text
+  stackTrace String?  @db.Text
+  url        String?
+  userAgent  String?
+  release    String?
+  metadata   Json?
+  receivedAt DateTime @default(now())
+
+  group ErrorGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+  @@index([receivedAt])
 }

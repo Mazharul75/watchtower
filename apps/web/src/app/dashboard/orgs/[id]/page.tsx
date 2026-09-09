@@ -44,7 +44,7 @@ export default async function OrgDetailPage({
   const fourteenDaysAgo = new Date();
   fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
-  const [flag, repoCount, memberCount, repos, incidentCounts, recentIncidents, recentIncidentDates] = await Promise.all([
+  const [flag, repoCount, memberCount, repos, incidentCounts, recentIncidents, recentIncidentDates, ingestProjectCount, unresolvedErrorCount] = await Promise.all([
     prisma.featureFlag.findUnique({ where: { key: "phase2.github_ingestion" } }),
     prisma.repository.count({ where: { organizationId: id } }),
     prisma.organizationMember.count({ where: { organizationId: id } }),
@@ -67,6 +67,8 @@ export default async function OrgDetailPage({
       where: { repository: { organizationId: id }, createdAt: { gte: fourteenDaysAgo } },
       select: { createdAt: true },
     }),
+    prisma.ingestProject.count({ where: { organizationId: id } }),
+    prisma.errorGroup.count({ where: { project: { organizationId: id }, resolvedAt: null } }),
   ]);
 
   const repoIds = repos.map((r) => r.id);
@@ -130,6 +132,35 @@ export default async function OrgDetailPage({
       </div>
 
       {github_error && <Alert tone="danger">{github_error}</Alert>}
+
+      <div>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--color-foreground-subtle)]">Solutions</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Link href={`/dashboard/orgs/${id}`} className="glass-card block rounded-2xl border-l-4 p-5" style={{ borderLeftColor: "var(--color-brand-indigo)" }}>
+            <div className="mb-1 flex items-center justify-between">
+              <span className="text-sm font-semibold text-[var(--color-foreground)]">GitHub Engineering Memory</span>
+              {openIncidents > 0 && <Badge tone="warning">{openIncidents} open</Badge>}
+            </div>
+            <p className="text-xs text-[var(--color-foreground-muted)]">Auto-built engineering graph, cited root-cause analysis, incident memory.</p>
+          </Link>
+          <Link href={`/dashboard/orgs/${id}/errors`} className="glass-card block rounded-2xl border-l-4 p-5" style={{ borderLeftColor: "#f43f5e" }}>
+            <div className="mb-1 flex items-center justify-between">
+              <span className="text-sm font-semibold text-[var(--color-foreground)]">Error Tracking</span>
+              {unresolvedErrorCount > 0 ? (
+                <Badge tone="danger">{unresolvedErrorCount} unresolved</Badge>
+              ) : ingestProjectCount > 0 ? (
+                <Badge tone="success">all clear</Badge>
+              ) : null}
+            </div>
+            <p className="text-xs text-[var(--color-foreground-muted)]">
+              {ingestProjectCount > 0
+                ? `Monitoring ${ingestProjectCount} project${ingestProjectCount === 1 ? "" : "s"} — any app, not just GitHub repos.`
+                : "Drop a snippet into any app — website, mobile, anything — and see its real runtime errors here."}
+            </p>
+          </Link>
+        </div>
+        <p className="mt-3 text-xs text-[var(--color-foreground-subtle)]">More solutions — uptime monitoring, feature flags, runbooks — are on the way.</p>
+      </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {stats.map((s) => (
