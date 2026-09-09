@@ -90,3 +90,71 @@
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
+
+/* Card entrance: a small fade+rise on mount, applied globally via
+   .glass-card so every card in the app — dashboard, org page, admin
+   console — gets it for free without touching each call site. Respects
+   reduced-motion below. */
+@keyframes fade-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.glass-card {
+  animation: fade-rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.animate-fade-rise {
+  animation: fade-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.glass-card:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: 0 12px 32px -16px rgba(99, 102, 241, 0.25);
+}
+
+/* A grid of cards mounts all at once — stagger by DOM order so it reads as
+   a cascade instead of a flash. Caps at 8 so a long list doesn't end in an
+   awkwardly long final delay. */
+.glass-card:nth-of-type(1) { animation-delay: 0ms; }
+.glass-card:nth-of-type(2) { animation-delay: 40ms; }
+.glass-card:nth-of-type(3) { animation-delay: 80ms; }
+.glass-card:nth-of-type(4) { animation-delay: 120ms; }
+.glass-card:nth-of-type(5) { animation-delay: 160ms; }
+.glass-card:nth-of-type(6) { animation-delay: 200ms; }
+.glass-card:nth-of-type(7) { animation-delay: 240ms; }
+.glass-card:nth-of-type(8) { animation-delay: 280ms; }
+
+/* Gradient underline that draws itself, used behind section headings on
+   the marketing page for a bit of the "manifesting" motion the rest of
+   the ecosystem's READMEs lean on. */
+@keyframes draw-line {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.animate-draw-line {
+  transform-origin: left;
+  animation: draw-line 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-card,
+  .animate-float,
+  .animate-draw-line,
+  .animate-pulse-soft,
+  .animate-fade-rise {
+    animation: none !important;
+    transition: none !important;
+  }
+}

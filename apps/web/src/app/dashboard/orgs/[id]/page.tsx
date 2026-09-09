@@ -7,6 +7,7 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { Alert, Badge } from "@/components/ui/alert";
 import { ReposPanel } from "@/components/dashboard/repos-panel";
 import { MembersPanel } from "@/components/dashboard/members-panel";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 
 export const metadata: Metadata = { title: "Organization" };
 
@@ -103,7 +104,9 @@ export default async function OrgDetailPage({
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {stats.map((s) => (
           <Card key={s.label} className="p-5">
-            <p className="text-2xl font-semibold text-[var(--color-foreground)]">{s.value}</p>
+            <p className="text-2xl font-semibold tabular-nums text-[var(--color-foreground)]">
+              <AnimatedNumber value={s.value} />
+            </p>
             <p className="mt-1 text-xs text-[var(--color-foreground-subtle)]">{s.label}</p>
           </Card>
         ))}

@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/site/navbar";
 import { Footer } from "@/components/site/footer";
 import { AmbientBackground } from "@/components/site/background";
+import { PipelineAnimation } from "@/components/site/pipeline-animation";
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/alert";
@@ -53,21 +54,37 @@ export default function LandingPage() {
 
       <main>
         <section className="mx-auto max-w-6xl px-6 pb-24 pt-20 text-center md:pt-28">
-          <div className="mx-auto mb-6 inline-flex">
-            <Badge tone="info">Phase 2 · GitHub Ingestion</Badge>
+          <div className="animate-fade-rise mx-auto mb-6 inline-flex">
+            <Badge tone="info">
+              <span className="mr-1.5 inline-block h-1.5 w-1.5 animate-pulse-soft rounded-full bg-[var(--color-brand-cyan)]" />
+              Phase 2 · GitHub Ingestion
+            </Badge>
           </div>
-          <h1 className="mx-auto max-w-3xl text-4xl font-bold leading-tight tracking-tight md:text-6xl">
+          <h1
+            className="animate-fade-rise mx-auto max-w-3xl text-4xl font-bold leading-tight tracking-tight md:text-6xl"
+            style={{ animationDelay: "80ms" }}
+          >
             An AI engineering memory
             <br />
             <span className="text-brand-gradient">for your GitHub repos.</span>
           </h1>
-          <p className="mx-auto mt-6 max-w-xl text-balance text-base text-[var(--color-foreground-muted)] md:text-lg">
+          <p
+            className="animate-fade-rise mx-auto mt-6 max-w-xl text-balance text-base text-[var(--color-foreground-muted)] md:text-lg"
+            style={{ animationDelay: "160ms" }}
+          >
             Watchtower finds the root cause, cites the evidence, remembers every incident, and waits for your
             approval before touching anything — built free, end to end.
           </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <div
+            className="animate-fade-rise mt-10 flex flex-wrap items-center justify-center gap-4"
+            style={{ animationDelay: "240ms" }}
+          >
             <ButtonLink href="/signup" size="lg">Get started free</ButtonLink>
             <ButtonLink href="/login" variant="outline" size="lg">Log in</ButtonLink>
+          </div>
+
+          <div className="animate-fade-rise mt-20" style={{ animationDelay: "320ms" }}>
+            <PipelineAnimation />
           </div>
         </section>
 

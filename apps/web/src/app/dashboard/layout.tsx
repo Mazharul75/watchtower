@@ -6,6 +6,7 @@ import { IMPERSONATOR_COOKIE_NAME } from "@/lib/session-cookie";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
 import { ImpersonationBanner } from "@/components/dashboard/impersonation-banner";
+import { AmbientBackground } from "@/components/site/background";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   // Authoritative check: this is a Server Component running in Node.js
@@ -25,7 +26,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const isImpersonating = Boolean(cookieStore.get(IMPERSONATOR_COOKIE_NAME)?.value);
 
   return (
-    <div className="flex min-h-screen bg-[var(--color-background)]">
+    <div className="relative flex min-h-screen bg-[var(--color-background)]">
+      <AmbientBackground />
       <Sidebar isSuperAdmin={dbUser?.isSuperAdmin ?? false} />
       <div className="flex flex-1 flex-col">
         {isImpersonating && <ImpersonationBanner name={session.user.name ?? null} email={session.user.email ?? null} />}

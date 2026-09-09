@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/alert";
 import { CreateOrgForm } from "@/components/dashboard/create-org-form";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -65,8 +66,8 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {stats.map((s) => (
           <Card key={s.label} className="p-5">
-            <p className={`text-2xl font-semibold ${s.tone === "warning" ? "text-[var(--color-warning)]" : "text-[var(--color-foreground)]"}`}>
-              {s.value}
+            <p className={`text-2xl font-semibold tabular-nums ${s.tone === "warning" ? "text-[var(--color-warning)]" : "text-[var(--color-foreground)]"}`}>
+              <AnimatedNumber value={s.value} />
             </p>
             <p className="mt-1 text-xs text-[var(--color-foreground-subtle)]">{s.label}</p>
           </Card>
