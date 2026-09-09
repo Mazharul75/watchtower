@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
 import { ImpersonationBanner } from "@/components/dashboard/impersonation-banner";
 import { AmbientBackground } from "@/components/site/background";
+import { CommandPalette } from "@/components/dashboard/command-palette";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   // Authoritative check: this is a Server Component running in Node.js
@@ -34,6 +35,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <Topbar name={session.user.name ?? null} email={session.user.email ?? null} />
         <main className="flex-1 p-6 md:p-8">{children}</main>
       </div>
+      <CommandPalette />
     </div>
   );
 }

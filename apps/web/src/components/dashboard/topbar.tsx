@@ -1,6 +1,7 @@
 import { signOutAction } from "@/app/actions/auth-actions";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
+import { SearchTrigger } from "@/components/dashboard/search-trigger";
 
 export function Topbar({ name, email }: { name: string | null; email: string | null }) {
   return (
@@ -10,6 +11,7 @@ export function Topbar({ name, email }: { name: string | null; email: string | n
         {name && <p className="text-xs text-[var(--color-foreground-subtle)]">{email}</p>}
       </div>
       <div className="flex items-center gap-2">
+        <SearchTrigger />
         <NotificationBell />
         <form action={signOutAction}>
           <Button type="submit" variant="outline" size="sm">Sign out</Button>
