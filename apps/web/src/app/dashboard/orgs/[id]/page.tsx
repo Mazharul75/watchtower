@@ -165,7 +165,15 @@ export default async function OrgDetailPage({
 
       {totalIncidents > 0 && (
         <Card className="p-6">
-          <CardHeader title="Recent incidents" description="Across every repository in this organization." />
+          <div className="mb-5 flex items-start justify-between gap-3">
+            <CardHeader title="Recent incidents" description="Across every repository in this organization." />
+            <a
+              href={`/api/orgs/${id}/incidents/export`}
+              className="shrink-0 rounded-lg border border-[var(--color-border-strong)] px-3 py-1.5 text-xs text-[var(--color-foreground-muted)] transition-colors hover:bg-black/[0.04] hover:text-[var(--color-foreground)]"
+            >
+              Export CSV
+            </a>
+          </div>
           <ul className="divide-y divide-[var(--color-border)]">
             {recentIncidents.map((incident) => (
               <li key={incident.id} className="flex items-center justify-between gap-3 py-3">
