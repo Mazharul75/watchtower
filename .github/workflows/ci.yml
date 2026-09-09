@@ -93,6 +93,19 @@ jobs:
     defaults:
       run:
         working-directory: apps/api
+    env:
+      # Overrides the workflow-level DATABASE_URL above, which is a plain
+      # `postgresql://` string for Prisma's benefit (the web job) — apps/api
+      # uses SQLAlchemy's async engine, which requires the `+asyncpg` driver
+      # suffix. Without it, `create_async_engine` falls back to trying to
+      # import the sync psycopg2 driver at module load time, which isn't
+      # installed here (requirements.txt only installs asyncpg) and breaks
+      # every test's collection, not just ones that touch the database — the
+      # tests never actually connect to this address (they use an in-memory
+      # SQLite engine instead, see tests/conftest.py); this only needs to be
+      # a validly-formed URL so app/db.py's module-level engine construction
+      # doesn't raise on import.
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/watchtower
     steps:
       - uses: actions/checkout@v4
 
