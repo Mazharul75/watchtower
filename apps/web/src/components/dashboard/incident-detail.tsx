@@ -102,29 +102,52 @@ export function IncidentDetail({ incidentId, canApprove }: { incidentId: string;
         </Alert>
       ) : (
         <>
-          <div>
-            <h2 className="mb-2 text-sm font-semibold text-[var(--color-foreground-subtle)]">HYPOTHESIS</h2>
-            <p className="text-sm leading-relaxed text-[var(--color-foreground)]">{incident.hypothesis ?? "—"}</p>
-            {incident.confidence != null && (
-              <Badge tone={incident.confidence >= 0.7 ? "success" : "warning"}>{Math.round(incident.confidence * 100)}% confidence</Badge>
+          <div
+            className="animate-fade-rise relative overflow-hidden rounded-2xl border p-6"
+            style={{
+              borderColor: "rgba(139, 92, 246, 0.35)",
+              background: "linear-gradient(155deg, rgba(99,102,241,0.14), rgba(34,211,238,0.06))",
+            }}
+          >
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-brand-cyan)]">
+                Why Watchtower thinks this happened
+              </span>
+              {incident.confidence != null && (
+                <Badge tone={incident.confidence >= 0.7 ? "success" : "warning"}>
+                  {incident.confidence >= 0.7 ? "High confidence" : "Moderate confidence"} · {Math.round(incident.confidence * 100)}%
+                </Badge>
+              )}
+            </div>
+            <p className="text-lg font-semibold leading-snug text-[var(--color-foreground)]">{incident.hypothesis ?? "—"}</p>
+            {incident.proposedFix && (
+              <p className="mt-3 border-t border-white/10 pt-3 text-sm leading-relaxed text-[var(--color-foreground-muted)]">
+                <span className="font-medium text-[var(--color-foreground)]">Proposed approach: </span>
+                {incident.proposedFix}
+              </p>
             )}
           </div>
 
-          {incident.proposedFix && (
-            <div>
-              <h2 className="mb-2 text-sm font-semibold text-[var(--color-foreground-subtle)]">PROPOSED APPROACH</h2>
-              <p className="text-sm leading-relaxed text-[var(--color-foreground)]">{incident.proposedFix}</p>
-            </div>
-          )}
-
           <div>
-            <h2 className="mb-2 text-sm font-semibold text-[var(--color-foreground-subtle)]">CITED EVIDENCE</h2>
+            <div className="mb-2 flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-[var(--color-foreground-subtle)]">CITED EVIDENCE</h2>
+              {incident.evidence.length > 0 && (
+                <span className="rounded-full bg-white/5 px-2 py-0.5 text-[11px] text-[var(--color-foreground-subtle)]">
+                  {incident.evidence.length} clickable source{incident.evidence.length === 1 ? "" : "s"}
+                </span>
+              )}
+            </div>
             <ul className="flex flex-col gap-2">
-              {incident.evidence.map((e) => (
-                <li key={e.node.id} className="glass-card rounded-lg p-3 text-sm">
-                  <a href={e.node.url ?? undefined} target="_blank" rel="noreferrer" className="hover:underline">
+              {incident.evidence.map((e, i) => (
+                <li
+                  key={e.node.id}
+                  className="glass-card flex items-center justify-between gap-3 rounded-lg p-3 text-sm"
+                  style={{ animationDelay: `${i * 40}ms` }}
+                >
+                  <a href={e.node.url ?? undefined} target="_blank" rel="noreferrer" className="min-w-0 truncate hover:underline">
                     {e.node.type} #{e.node.externalId} — {e.node.title ?? "(untitled)"}
                   </a>
+                  <span className="shrink-0 text-xs text-[var(--color-foreground-subtle)]">{Math.round(e.score * 100)}% relevance</span>
                 </li>
               ))}
               {incident.evidence.length === 0 && <p className="text-sm text-[var(--color-foreground-muted)]">None.</p>}
