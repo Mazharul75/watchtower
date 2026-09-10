@@ -146,7 +146,9 @@ export async function answerQuestion(chatbotId: string, question: string): Promi
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: process.env.GROQ_MODEL ?? "llama-3.3-70b-versatile",
+        // See the matching comment in lib/llm/groq-provider.ts — this model
+        // ID must be kept in sync with that one.
+        model: process.env.GROQ_MODEL ?? "openai/gpt-oss-120b",
         messages: [{ role: "user", content: buildPrompt(question, context) }],
         temperature: 0.2,
       }),

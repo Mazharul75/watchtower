@@ -20,6 +20,11 @@ interface MessageDTO {
   createdAt: string;
 }
 
+interface TranscriptEntry {
+  question: string;
+  answer: string | null;
+}
+
 export function ChatbotDetail({ chatbotId, canManage }: { chatbotId: string; canManage: boolean }) {
   const [documents, setDocuments] = useState<DocumentDTO[] | null>(null);
   const [messages, setMessages] = useState<MessageDTO[] | null>(null);
@@ -28,6 +33,10 @@ export function ChatbotDetail({ chatbotId, canManage }: { chatbotId: string; can
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+
+  const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
+  const [testQuestion, setTestQuestion] = useState("");
+  const [testPending, setTestPending] = useState(false);
 
   const loadDocs = useCallback(async () => {
     const res = await fetch(`/api/chatbots/${chatbotId}/documents`);
@@ -84,10 +93,76 @@ export function ChatbotDetail({ chatbotId, canManage }: { chatbotId: string; can
     setBusyId(null);
   }
 
+  async function sendTestQuestion(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const question = testQuestion.trim();
+    if (!question) return;
+    setTestQuestion("");
+    setTranscript((prev) => [...prev, { question, answer: null }]);
+    setTestPending(true);
+    try {
+      const res = await fetch(`/api/chatbots/${chatbotId}/test`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+      const data = await res.json();
+      const answer = res.ok ? data.answer : (data.error ?? "Something went wrong.");
+      setTranscript((prev) => prev.map((t, i) => (i === prev.length - 1 ? { ...t, answer } : t)));
+      await loadMessages();
+    } catch {
+      setTranscript((prev) => prev.map((t, i) => (i === prev.length - 1 ? { ...t, answer: "Network error. Please try again." } : t)));
+    } finally {
+      setTestPending(false);
+    }
+  }
+
   if (error) return <Alert tone="danger">{error}</Alert>;
 
   return (
     <div className="flex flex-col gap-8">
+      <div>
+        <h2 className="mb-3 text-sm font-semibold text-[var(--color-foreground-subtle)]">TRY IT HERE</h2>
+        <div className="glass-card flex flex-col gap-3 rounded-xl p-4">
+          {transcript.length === 0 ? (
+            <p className="text-sm text-[var(--color-foreground-subtle)]">
+              Ask this chatbot a question the way a visitor to your site would — this uses the exact same pipeline the
+              embedded widget calls.
+            </p>
+          ) : (
+            <ul className="flex max-h-72 flex-col gap-3 overflow-y-auto">
+              {transcript.map((t, i) => (
+                <li key={i} className="text-sm">
+                  <p className="font-medium text-[var(--color-foreground)]">You: {t.question}</p>
+                  <p className="mt-1 text-[var(--color-foreground-muted)]">
+                    {t.answer === null ? (
+                      <span className="inline-flex items-center gap-2">
+                        <Spinner /> Thinking…
+                      </span>
+                    ) : (
+                      `Bot: ${t.answer}`
+                    )}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+          <form onSubmit={sendTestQuestion} className="flex gap-2">
+            <Input
+              value={testQuestion}
+              onChange={(e) => setTestQuestion(e.target.value)}
+              placeholder="Type a question…"
+              disabled={testPending}
+              className="flex-1"
+            />
+            <Button type="submit" size="sm" disabled={testPending || !testQuestion.trim()}>
+              {testPending && <Spinner />}
+              Send
+            </Button>
+          </form>
+        </div>
+      </div>
+
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-[var(--color-foreground-subtle)]">KNOWLEDGE DOCUMENTS</h2>

@@ -31,7 +31,7 @@ describe("GroqProvider", () => {
       }),
     );
 
-    const provider = new GroqProvider("test-key", "llama-3.3-70b-versatile");
+    const provider = new GroqProvider("test-key", "openai/gpt-oss-120b");
     const result = await provider.generateHypothesis(REQUEST);
 
     expect(result.ok).toBe(true);

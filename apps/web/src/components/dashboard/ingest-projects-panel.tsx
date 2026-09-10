@@ -52,6 +52,8 @@ export function IngestProjectsPanel({ organizationId, canManage, origin }: { org
   const [busyId, setBusyId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [testPendingId, setTestPendingId] = useState<string | null>(null);
+  const [testSentId, setTestSentId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -109,6 +111,20 @@ export function IngestProjectsPanel({ organizationId, canManage, origin }: { org
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 2000);
     });
+  }
+
+  async function sendTestError(id: string) {
+    setTestPendingId(id);
+    setTestSentId(null);
+    try {
+      const res = await fetch(`/api/orgs/${organizationId}/ingest-projects/${id}/test-error`, { method: "POST" });
+      if (res.ok) {
+        setTestSentId(id);
+        await load();
+      }
+    } finally {
+      setTestPendingId(null);
+    }
   }
 
   if (error) return <Alert tone="danger">{error}</Alert>;
@@ -188,11 +204,29 @@ export function IngestProjectsPanel({ organizationId, canManage, origin }: { org
                     <pre className="overflow-x-auto rounded-lg bg-[#0F172A] p-3 text-[11px] leading-relaxed text-slate-100">
                       <code>{snippet}</code>
                     </pre>
-                    <div className="mt-2">
+                    <div className="mt-2 flex items-center gap-3">
                       <Button size="sm" variant="outline" onClick={() => copySnippet(p.id, snippet)}>
                         {copiedId === p.id ? "Copied!" : "Copy snippet"}
                       </Button>
+                      {canManage && (
+                        <Button size="sm" variant="ghost" onClick={() => sendTestError(p.id)} disabled={testPendingId === p.id}>
+                          {testPendingId === p.id && <Spinner />}
+                          Send a test error
+                        </Button>
+                      )}
+                      {testSentId === p.id && (
+                        <span className="text-xs text-[var(--color-success-text)]">
+                          Sent —{" "}
+                          <Link href={`/dashboard/orgs/${organizationId}/errors/${p.id}`} className="text-[var(--color-link)] hover:underline">
+                            view it
+                          </Link>
+                        </span>
+                      )}
                     </div>
+                    <p className="mt-2 text-xs text-[var(--color-foreground-subtle)]">
+                      Don&apos;t have a site to paste the snippet into yet? Use &ldquo;Send a test error&rdquo; to see the pipeline
+                      work right now.
+                    </p>
                   </div>
                 )}
               </li>

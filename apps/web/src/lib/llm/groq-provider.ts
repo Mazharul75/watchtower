@@ -18,7 +18,10 @@ export class GroqProvider implements LLMProvider {
 
   constructor(
     private readonly apiKey: string | undefined = process.env.GROQ_API_KEY,
-    private readonly model: string = process.env.GROQ_MODEL ?? "llama-3.3-70b-versatile",
+    // llama-3.3-70b-versatile was deprecated by Groq on 2026-08-16 (free/
+    // developer tier) — see console.groq.com/docs/deprecations. If this
+    // ever 404s again, that page is the first place to check.
+    private readonly model: string = process.env.GROQ_MODEL ?? "openai/gpt-oss-120b",
   ) {}
 
   async generateHypothesis(request: HypothesisRequest): Promise<HypothesisResponse> {
