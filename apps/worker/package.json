@@ -10,7 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@prisma/client": "6.19.3"
+    "@prisma/client": "7.10.0"
   },
   "devDependencies": {
     "@types/node": "22.10.5",
